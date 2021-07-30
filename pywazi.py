@@ -100,9 +100,9 @@ class waziRequest:
             opener = urllib.request.build_opener(proxy, urllib.request.HTTPHandler)
             urllib.request.install_opener(opener)
         if self.useHeaders:
-            request = urllib.request.Request(url = urllib.parse.quote(url), headers = self.headers)
+            request = urllib.request.Request(url = url, headers = self.headers)
         else:
-            request = urllib.request.Request(url = urllib.parse.quote(url))
+            request = urllib.request.Request(url = url)
         return urllib.request.urlopen(request)
 
     def post(self, url, data):
@@ -199,6 +199,7 @@ class waziCheck:
             "Asian Porn": 128,
             "Misc": 1
         }
+        self.empty = ""
 
     def getFileSHA1(self, path):
         self.sha1 = hashlib.sha1()
@@ -226,11 +227,25 @@ class waziCheck:
             sources = calc
         return sources
 
+    def signature(self, url, times, method, baseUrl, uuids, apiKey, secretKey):
+        self.empty = ""
+        raw = url.replace(baseUrl, "") + str(times) + uuids + method + apiKey
+        raw = raw.lower()
+        hc = hmac.new(secretKey.encode(), digestmod = hashlib.sha256)
+        hc.update(raw.encode())
+        return hc.hexdigest()
+
+    def construct(self, url, method, baseUrl, uuids, apiKey, secretKey):
+        self.empty = ""
+        times = int(time.time())
+        sig = waziCheck.signature(self, url, times, method, baseUrl, uuids, apiKey, secretKey)
+        return [sig, times]
+
 class waziDanbooru:
     # Danbooru is a powerful image board system which uses tagging extensively.
-    # like https://yande.re/ https://konachan.com/ (R18 NSFW)
+    # like https://yande.re/ https://konachan.com/ (R-18 NSFW)
     # Danbooru 是一个非常牛逼的画廊展示系统（相册图库差不多吧），主要就是用标签多一点。
-    # 像 https://yande.re/ https://konachan.com/ （R18 不适合在公开场合或工作环境浏览）
+    # 像 https://yande.re/ https://konachan.com/ （R-18 不适合在公开场合或工作环境浏览）
     def __init__(self):
         super(waziDanbooru, self).__init__()
         self.request = waziRequest()
@@ -255,7 +270,7 @@ class waziDanbooru:
 
     def getPosts(self, page, tags):
         url = self.api + "/post.json?page" + str(page)
-        url += "&tags=" + tags
+        url += "&tags=" + urllib.parse.quote(tags)
         tempParams = self.request.handleParams(self.params, "get", url, self.headers, self.proxies)
         return json.loads(self.request.do(tempParams).read())
 
@@ -299,8 +314,8 @@ class waziJavBus:
         self.params = params
         return self.params
 
-    def getAjax(self):
-        url = "https://www.javbus.com/" + self.params["avId"]
+    def getAjax(self, avId):
+        url = "https://www.javbus.com/" + avId
         tempHeaders = self.headers
         tempHeaders["Referer"] = url
         tempParams = self.params
@@ -319,8 +334,8 @@ class waziJavBus:
         gid = match[0].replace("var gid = ", "").replace(";", "")
         return "https://www.javbus.com/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc
 
-    def getMagnet(self):
-        ajaxUrl = waziJavBus.getAjax(self)
+    def getMagnet(self, avId):
+        ajaxUrl = waziJavBus.getAjax(self, avId)
         tempParams = self.params
         tempParams["useHeaders"] = True
         requestParams = self.request.handleParams(tempParams, "get", ajaxUrl, self.headers, self.proxies)
@@ -369,13 +384,14 @@ class waziExHentai:
             "proxyPort": "7890"
         }
         self.request = waziRequest()
-        self.displayMode = ""
         self.urls = {
             "main": "https://exhentai.org/",
             "galleryTorrent": "https://exhentai.org/gallerytorrents.php?gid=",
-            "api": "https://exhentai.org/api.php"
+            "api": "https://exhentai.org/api.php",
+            "mpv": "https://exhentai.org/mpv/"
         }
         self.params = {}
+        self.empty = ""     # Trash Code
 
     def giveParams(self, params):
         self.params = params
@@ -386,21 +402,20 @@ class waziExHentai:
         return self.headers["Cookie"]
 
     def getBooks(self, url):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        requestParams = self.request.handleParams(tempParams, "get", url, self.headers, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        soup = waziExHentai.returnSoup(self, url)
         booksList = []
-        urls = soup.find_all(class_ ='itg glte')[0].find_all(class_ ='gl2e')
-        covers = soup.find_all(class_ ='itg glte')[0].find_all(class_ ='gl1e')
+        urls = soup.find_all(class_ = "itg glte")[0].find_all(class_ = "gl2e")
+        covers = soup.find_all(class_ = "itg glte")[0].find_all(class_ = "gl1e")
         coverTimes = -1
         for tempUrl in urls:
             coverTimes += 1
-            title = tempUrl.find_all(class_ = "glink")[0].get_text()
-            href = tempUrl.find_all("a", attrs = {"href": re.compile("/g/")})[0].attrs["href"]
-            bCats = tempUrl.find_all(class_ = "cn")[0].get_text()
-            cover = covers[coverTimes].find_all("img")[0].attrs["src"]
-            booksList.append({"title": title, "href": href, "bCats": bCats, "cover": cover})
+            tempBooks = {
+                "title": tempUrl.find_all(class_ = "glink")[0].get_text(),
+                "href": tempUrl.find_all("a", attrs = {"href": re.compile("/g/")})[0].attrs["href"],
+                "bCats": tempUrl.find_all(class_ = "cn")[0].get_text(),
+                "cover": covers[coverTimes].find_all("img")[0].attrs["src"]
+            }
+            booksList.append(tempBooks)
         return booksList
 
     def browse(self, page):
@@ -413,39 +428,34 @@ class waziExHentai:
         return waziExHentai.getBooks(self, url)
 
     def search(self, page, text):
-        url = self.urls["main"] + "?page=" + str(page) + "&f_search=" + text
+        url = self.urls["main"] + "?page=" + str(page) + "&f_search=" + urllib.parse.quote(text)
         return waziExHentai.getBooks(self, url)
 
     def allSearch(self, page, text):
         url = self.urls["main"] + "?page=" + str(
             page) + "&?f_cats=0&advsearch=1&f_sname=on&f_stags=on&f_sh=on&f_sdt2=on&f_sfl=on&f_sfu=on&f_sft=on" \
-                    "&f_search=" + text
+                    "&f_search=" + urllib.parse.quote(text)
         return waziExHentai.getBooks(self, url)
 
     def tagSearch(self, page, tag):
-        url = self.urls["main"] + "tag/" + tag + "/" + str(page)
+        url = self.urls["main"] + "tag/" + urllib.parse.quote(tag) + "/" + str(page)
         return waziExHentai.getBooks(self, url)
 
     def uploaderSearch(self, page, uploader):
-        url = self.urls["main"] + "/uploader/" + uploader + "/" + str(page)
+        url = self.urls["main"] + "uploader/" + urllib.parse.quote(uploader) + "/" + str(page)
         return waziExHentai.getBooks(self, url)
 
     def uploaderAllSearch(self, page, uploader):
-        url = self.urls["main"] + "?page=" + str(page) + "&f_cats=0&f_search=uploader%3A" + uploader + "&advsearch=1" \
-                                                                                                       "&f_sname=on" \
-                                                                                                       "&f_stags=on" \
-                                                                                                       "&f_sdt2=on" \
-                                                                                                       "&f_spf=&f_spt" \
-                                                                                                       "=&f_sfl=on" \
-                                                                                                       "&f_sfu=on" \
-                                                                                                       "&f_sft=on"
+        url = self.urls["main"] + "?page=" + str(page) + "&f_cats=0&f_search=uploader%3A"
+        url += urllib.parse.quote(uploader) + "&advsearch=1&f_sname=on&f_stags=on&f_sdt2=on&f_spf=&f_spt=&f_sfl=on"
+        url += "&f_sfu=on&f_sft=on"
         return waziExHentai.getBooks(self, url)
 
     def advancedSearch(self, params):
         url = self.urls["main"]
         url += "?f_cats=" + waziCheck().getSources(params)
         if str(params["search"]):
-            url += "&f_search=" + str(params["search"])
+            url += "&f_search=" + urllib.parse.quote(str(params["search"]))
         url += "&advsearch=1"
         if params["sgn"]:
             url += "&f_sname=on"
@@ -500,18 +510,18 @@ class waziExHentai:
         url += "&f_search="
         if "uploaders" in params:
             for i in params["uploaders"]:
-                url += "uploader:" + i + "+"
+                url += "uploader:" + urllib.parse.quote(i) + "+"
             url = url[:-1]
         if "tags" in params:
             if "uploaders" in params:
                 url += "+"
             for i in params["tags"]:
-                url += i + "+"
+                url += urllib.parse.quote(i) + "+"
             url = url[:-1]
         if "text" in params:
             if "tags" in params:
                 url += "+"
-            url += params["text"]
+            url += urllib.parse.quote(params["text"])
         if "advanced" in params:
             url += "&advsearch=1"
             if "search" in params["advanced"]:
@@ -626,12 +636,16 @@ class waziExHentai:
                     url = url
         return waziExHentai.getBooks(self, url)
 
-    def getTorrent(self, link):
+    def returnSoup(self, link):
         tempParams = self.params
         tempParams["useHeaders"] = True
+        requestParams = self.request.handleParams(tempParams, "get", link, self.headers, self.proxies)
+        soup = BeautifulSoup(self.request.do(requestParams).read(), "lxml")
+        return soup
+
+    def getTorrent(self, link):
         url = self.urls["galleryTorrent"] + link.split("/")[4] + "&t=" + link.split("/")[5]
-        requestParams = self.request.handleParams(tempParams, "get", url, self.headers, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        soup = waziExHentai.returnSoup(self, url)
         torrents = []
         try:
             tempNum = len(soup.find_all("a")) - 1
@@ -652,10 +666,7 @@ class waziExHentai:
         return torrents
 
     def getInfo(self, link):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        requestParams = self.request.handleParams(tempParams, "get", link, self.headers, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        soup = waziExHentai.returnSoup(self, link)
         tags = []
         for tag in soup.find_all(id = "taglist")[0].find_all("a"):
             tags.append(tag.attrs["onclick"].split("'")[1])
@@ -678,10 +689,7 @@ class waziExHentai:
         return info
 
     def getComments(self, link):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        requestParams = self.request.handleParams(tempParams, "get", link, self.headers, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        soup = waziExHentai.returnSoup(self, link)
         comments = []
         for i in soup.find_all(id = "cdiv")[0].find_all(class_ = "c1"):
             htmlComments = i.find_all(class_="c6")[0].prettify()
@@ -716,9 +724,550 @@ class waziExHentai:
         requestParams = self.request.handleParams(tempParams, "post", self.urls["api"], headers, self.proxies)
         return json.loads(self.request.do(requestParams).read())
 
-    # TODO: ExHentai： 缩略图（normal large） MPV 的图片列表与下载 普通用户的图片列表与下载 压缩包下载 其他显示模式的支持
-    # TODO: JavBus： 首页爬虫 分类爬虫
-    # TODO: Danbooru： 再看看能不能优化一下
-    # TODO: PicAcg： 登录 获得所有分区 获取漫画信息 搜索 高级搜索 获取漫画 获取漫画分页 获取漫画分页图片 下载漫画
-    # TODO: 加解密： PicAcg 那块
-    # TODO: 其他： 写文档 测试 把用到的的几个开源项目写一下
+    def getPages(self, link):
+        soup = waziExHentai.returnSoup(self, link)
+        try:
+            pages = int(soup.find_all(class_ = "ptt")[0].find_all("a")[-2].get_text())
+        except:
+            return 0
+        else:
+            return pages
+
+    def parseSoupForLargeThumbnails(self, soup):
+        self.empty = ""
+        thumbnails = []
+        for i in soup.find(id = "gdt").find_all(class_ = "gdtl"):
+            tempThumbnails = {
+                "url": i.a.img.attrs["src"],
+                "style": i.attrs["style"],
+                "alt": i.a.img.attrs["alt"],
+                "title": i.a.img.attrs["title"],
+                "text": i.a.get_text()
+            }
+            thumbnails.append(tempThumbnails)
+        return thumbnails
+
+    def getLargeThumbnails(self, link):
+        soup = waziExHentai.returnSoup(self, link)
+        page = waziExHentai.getPages(self, link)
+        thumbnails = []
+        if page == 0:
+            return waziExHentai.parseSoupForLargeThumbnails(self, soup)
+        else:
+            for i in range(page + 1):
+                url = link + "?p=" + str(i)
+                soup = waziExHentai.returnSoup(self, url)
+                thumbnails.append(waziExHentai.parseSoupForLargeThumbnails(self, soup))
+            return thumbnails
+
+    def parseSoupForNormalThumbnails(self, soup):
+        self.empty = ""
+        thumbnails = []
+        for i in soup.find_all(class_ = "gdtm"):
+            tempThumbnails = {
+                "style": i.attrs["style"],
+                "divMargin": i.div.attrs["style"].split("margin:")[1].split(";")[0],
+                "divWidth": i.div.attrs["style"].split("width:")[1].split(";")[0],
+                "divHeight": i.div.attrs["style"].split("height:")[1].split(";")[0],
+                "url": i.div.attrs["style"].split("url(")[1].split(")")[0],
+                "transparent": i.div.attrs["style"].split(") ")[1],
+                "imgAlt": i.div.a.img.attrs["alt"],
+                "imgTitle": i.div.a.img.attrs["title"],
+                "imgWidth": i.div.a.img.attrs["style"].split("width:")[1].split(";")[0],
+                "imgHeight": i.div.a.img.attrs["style"].split("height:")[1].split(";")[0],
+                "imgMargin": i.div.a.img.attrs["style"].split("margin:")[1]
+            }
+            thumbnails.append(tempThumbnails)
+        return thumbnails
+
+    def getNormalThumbnails(self, link):
+        soup = waziExHentai.returnSoup(self, link)
+        page = waziExHentai.getPages(self, link)
+        thumbnails = []
+        if page == 0:
+            return waziExHentai.parseSoupForNormalThumbnails(self, soup)
+        else:
+            for i in range(page + 1):
+                url = link + "?p=" + str(i)
+                soup = waziExHentai.returnSoup(self, url)
+                thumbnails.append(waziExHentai.parseSoupForNormalThumbnails(self, soup))
+            return thumbnails
+
+    def getTitle(self, link, params):
+        if params["japanese"]:
+            title = waziExHentai.getInfo(self, link)["jTitle"]
+        else:
+            title = waziExHentai.getInfo(self, link)["title"]
+        title.strip().rstrip("\\")
+        return title
+
+    def createFolder(self, link, params):
+        title = waziExHentai.getTitle(self, link, params)
+        isExists = os.path.exists(os.path.join(params["path"], title))
+        if not isExists:
+            os.makedirs(os.path.join(params["path"], title))
+
+    def getMPVImages(self, link, method, params = None):
+        mpvUrl = self.urls["mpv"] + link.split("/")[4] + link.split("/")[5]
+        post = {
+            "method": "imagedispatch",
+            "gid": int(link.split("/")[4]),
+            "page": "",
+            "imgkey": "",
+            "mpvkey": ""
+        }
+        soup = waziExHentai.returnSoup(self, mpvUrl)
+        scripts = str(soup.find_all("script")[1]).split("<script type=\"text/javascript\">")[1].split("</script>")[0]
+        imgLists = eval(scripts.split("var imagelist = ")[1].split(";")[0])
+        mpvkey = scripts.split("mpvkey = \"")[1].split("\"")[0]
+        mpvLists = []
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        tempHeaders = self.headers
+        tempHeaders["Content-Type"] = "application/json"
+        title = waziExHentai.getTitle(self, link, params)
+        if method == "download":
+            waziExHentai.createFolder(self, link, params)
+        i = 0
+        for dic in imgLists:
+            i += 1
+            post["page"] = i
+            post["imgkey"] = dic["k"]
+            post["mpvkey"] = mpvkey
+            requestParams = self.request.handleParams(tempParams, "post", self.urls["api"], tempHeaders, self.proxies)
+            requestParams["data"] = json.dumps(post).encode()
+            lists = json.loads(str(self.request.do(requestParams).read(), encoding = "utf-8"))
+            if method == "get":
+                mpvLists.append({
+                    "name": dic["n"],
+                    "url": lists["i"]
+                })
+            if method == "download":
+                requestParams = self.request.handleParams(tempParams, "get", lists["i"], self.headers, self.proxies)
+                with open(os.path.join(params["path"], title, dic["n"]), "wb") as f:
+                    f.write(self.request.do(requestParams).read())
+                mpvLists.append(os.path.join(params["path"], title, dic["n"]))
+        return mpvLists
+
+    def getImages(self, soup, method, title, params = None):
+        waziTick = 0
+        images = []
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        pics = soup.find_all(id = "gdt")[0].find_all("a")
+        for pic in pics:
+            waziTick += 1
+            href = pic["href"]
+            soup = waziExHentai.returnSoup(self, href)
+            src = soup.find_all(id = "img")[0].attrs["src"]
+            if method == "get":
+                images.append(src)
+            if method == "download":
+                requestParams = self.request.handleParams(tempParams, "get", src, self.headers, self.proxies)
+                with open(os.path.join(params["path"], title, src.split("/")[-1]), "wb") as f:
+                    f.write(self.request.do(requestParams).read())
+                images.append(os.path.join(params["path"], title, src.split("/")[-1]))
+        return images
+
+    def getNormalImages(self, link, method, params = None):
+        title = waziExHentai.getTitle(self, link, params)
+        normalImages = []
+        if method == "download":
+            waziExHentai.createFolder(self, link, params)
+        page = waziExHentai.getPages(self, link)
+        if page == 0:
+            soup = waziExHentai.returnSoup(self, link)
+            return waziExHentai.getImages(self, soup, method, title, params)
+        else:
+            for i in range(page + 1):
+                url = link + "?p=" + str(i)
+                soup = waziExHentai.returnSoup(self, url)
+                normalImages.append(waziExHentai.getImages(self, soup, method, title, params))
+            return normalImages
+
+    def getArchivesHATH(self, link):
+        soup = waziExHentai.returnSoup(self, link)
+        url = soup.find_all(class_ = "g2 gsp")[0].a.attrs["onclick"].split("'")[1]
+        soup = waziExHentai.returnSoup(self, url)
+        archiveLists = []
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        action = soup.find_all("form")[0].attrs["action"]
+        for i in soup.find_all("td"):
+            if i.find_all("p")[1].get_text() == "N/A":
+                archiveTemp = {
+                    "sample": i.find_all("p")[0].get_text(),
+                    "size": i.find_all("p")[1].get_text(),
+                    "cost": i.find_all("p")[2].get_text(),
+                    "code": "N/A",
+                    "url": "N/A"
+                }
+                archiveLists.append(archiveTemp)
+            else:
+                archiveTemp = {
+                    "sample": i.find_all("p")[0].get_text(),
+                    "size": i.find_all("p")[1].get_text(),
+                    "cost": i.find_all("p")[2].get_text(),
+                    "code": i.find_all("p")[0].a.attrs["onclick"].split("'")[1],
+                    "url": action
+                }
+                archiveLists.append(archiveTemp)
+        return archiveLists
+
+    def toHATH(self, link, code):
+        forms = {
+            "hathdl_xres": code
+        }
+        forms = urllib.parse.urlencode(forms).encode("utf-8")
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        requestParams = self.request.handleParams(tempParams, "post", link, self.headers, self.proxies)
+        requestParams["data"] = forms
+        try:
+            self.request.do(requestParams)
+        except:
+            return "Error, check your cookies and something balabala. / 错误，请检查你的 Cookies 或者其他乱七八糟的东西。"
+        else:
+            return "Done! / 完成！"
+
+    def parseArchives(self, form, action):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        forms = urllib.parse.urlencode(form).encode("utf-8")
+        requestParams = self.request.handleParams(tempParams, "post", action, self.headers, self.proxies)
+        requestParams["data"] = forms
+        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        tempUrl = soup.find_all("script")[0]
+        tempUrl = str(tempUrl).split("document.location = \"")[1].split("\";")[0]
+        requestParams = self.request.handleParams(tempParams, "get", tempUrl, self.headers, self.proxies)
+        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        href = soup.find_all("a")[0].attrs["href"]
+        downloadLink = urllib.parse.urljoin(tempUrl, href)
+        return downloadLink
+
+    def getArchives(self, link):
+        soup = waziExHentai.returnSoup(self, link)
+        url = soup.find_all(class_="g2 gsp")[0]
+        url = url.a.attrs["onclick"].split("'")[1]
+        soup = waziExHentai.returnSoup(self, url)
+        twoLists = []
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        action = soup.find_all("form")[0].attrs["action"]
+        orgForms = {
+            "dltype": "org",
+            "dlcheck": "Download Original Archive"
+        }
+        resForms = {
+            "dltype": "res",
+            "dlcheck": "Download Resample Archive"
+        }
+        orgExist = "disabled" in soup.find_all("form")[0].div.input.attrs
+        resExist = "disabled" in soup.find_all("form")[1].div.input.attrs
+        if not orgExist:
+            temp = {
+                "type": "original",
+                "link": waziExHentai.parseArchives(self, orgForms, action)
+            }
+            twoLists.append(temp)
+        if not resExist:
+            temp = {
+                "type": "resample",
+                "link": waziExHentai.parseArchives(self, resForms, action)
+            }
+            twoLists.append(temp)
+        return twoLists
+
+    def downloadArchives(self, link, params):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        title = waziExHentai.getTitle(self, link, params)
+        waziExHentai.createFolder(self, link, params)
+        links = waziExHentai.getArchives(self, link)
+        if not links:
+            return "No url return. / 没有返回 URL。"
+        for i in links:
+            requestParams = self.request.handleParams(tempParams, "get", i["link"], self.headers, self.proxies)
+            with open(os.path.join(params["path"], title, i["type"]), "wb") as f:
+                f.write(self.request.do(requestParams).read())
+        return "Done! / 完工！"
+
+class waziPicAcg:
+    # An APP that facilitates people to view magazines (R-18).
+    # my impression of it is that it is particularly difficult to do crawling.
+    #
+    # 一个方便人们观看杂志（R-18）的 APP。
+    # 我对它的印象就是：特别难做爬虫。
+    # [2]
+    def __init__(self):
+        super(waziPicAcg, self).__init__()
+        self.empty = ""
+        self.headers = {
+            "api-key": "",
+            "accept": "application/vnd.picacomic.com.v1+json",
+            "app-channel": "3",
+            "time": "0",
+            "nonce": "",
+            "signature": "0",
+            "app-version": "2.2.1.3.3.4",
+            "app-uuid": "418e56fb-60fb-352b-8fca-c6e8f0737ce6",
+            "app-platform": "android",
+            "Content-Type": "application/json; charset=UTF-8",
+            "User-Agent": "okhttp/3.8.1",
+            "app-build-version": "45"
+        }
+        self.info = {
+            "secretKey": "~d}$Q7$eIni=V)9\\RK/P.RM4;9[7|@/CA}b~OW!3?EV`:<>M7pddUBL5n|0/*Cn",
+            "baseUrl": "https://picaapi.picacomic.com/",
+            "uuid": "",
+            "apiKey": "C69BAF41DA5ABD1FFEDC6D2FEA56B"
+        }
+        self.params = {}
+        self.proxies = {
+            "proxyAddress": "127.0.0.1",
+            "proxyPort": "7890"
+        }
+        self.token = ""
+        self.urls = {
+            "login": "https://picaapi.picacomic.com/auth/sign-in",
+            "init": "https://139.59.113.68/init",
+            "categories": "https://picaapi.picacomic.com/categories",
+            "search": "https://picaapi.picacomic.com/comics/search",
+            "comics": "https://picaapi.picacomic.com/comics",
+            "comicId": "https://picaapi.picacomic.com/comics/{comicId}",
+            "comicEps": "https://picaapi.picacomic.com/comics/{comicId}/eps",
+            "comicPages": "https://picaapi.picacomic.com/comics/{comicId}/order/{order}/pages",
+            "comicRecommend": "https://picaapi.picacomic.com/comics/{comicId}/recommendation",
+            "keywords": "https://picaapi.picacomic.com/keywords",
+            "myComments": "https://picaapi.picacomic.com/users/my-comments",
+            "myFavourites": "https://picaapi.picacomic.com/users/favourite?s=dd",
+            "profile": "https://picaapi.picacomic.com/users/profile",
+            "games": "https://picaapi.picacomic.com/games",
+            "comicFavourite": "https://picaapi.picacomic.com/comics/{comicId}/favourite",
+            "comicLike": "https://picaapi.picacomic.com/comics/{comicId}/like",
+            "comicComments": "https://picaapi.picacomic.com/comics/{comicId}/comments",
+            "advSearch": "https://picaapi.picacomic.com/comics/advanced-search",
+            "punchIn": "https://picaapi.picacomic.com/users/punch-in"
+        }
+        self.request = waziRequest()
+
+    def giveParams(self, params):
+        self.params = params
+        return self.params
+
+    def headers(self):
+        self.info["uuid"] = str(uuid.uuid4()).replace("-", "")
+        self.headers["nonce"] = self.info["uuid"]
+        self.headers["api-key"] = self.info["apiKey"]
+
+    def sign(self, url, method):
+        sig = waziCheck().construct(url, method, self.info["baseUrl"], self.info["uuid"], self.info["apiKey"],
+                                    self.info["secretKey"])
+        self.headers["signature"] = sig[0]
+        self.headers["time"] = str(sig[1])
+
+    def login(self, username, password):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["login"], "POST")
+        body = {
+            "email": username,
+            "password": password
+        }
+        requestParams = self.request.handleParams(tempParams, "post", self.urls["api"], self.headers, self.proxies)
+        requestParams["data"] = json.dumps(body).encode()
+        jsons = json.loads(self.request.do(requestParams))
+        self.token = jsons["data"]["token"]
+
+    def getCategories(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["categories"], "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", self.urls["categories"], self.headers,
+                                                  self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getComics(self, page, c, t, s):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comics"] + "?page=" + str(page) + "&c=" + urllib.parse.quote(c)
+        newUrl += "&t=" + urllib.parse.quote(t) + "&s=" + s
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def search(self, page, keyword):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["search"] + "?page=" + str(page) + "&q=" + urllib.parse.quote(keyword)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getComic(self, comicId):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comicId"].replace("{comicId}", comicId)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getComicEps(self, comicId, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comicEps"].replace("{comicId}", comicId) + "?page=" + str(page)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def advancedSearch(self, categories, keyword, sort, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["advSearch"] + "?page=" + str(page)
+        body = {
+            "categories": categories,
+            "keyword": keyword,
+            "sort": sort
+        }
+        waziPicAcg.sign(self, newUrl, "POST")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "post", newUrl, self.headers, self.proxies)
+        requestParams["data"] = json.dumps(body).encode()
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getComicPages(self, comicId, eps, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comicPages"].replace("{comicId}", comicId).replace("{order}", eps) + "?page=" + str(page)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getComicRecommend(self, comicId):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comicRecommend"].replace("{comicId}", comicId)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getKeywords(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["keywords"], "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", self.urls["keywords"], self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getMyComments(self, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["myComments"] + "?page=" + str(page)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getMyFavourites(self, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["myFavourites"] + "&page=" + str(page)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getMyProfile(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["profile"], "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", self.urls["profile"], self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getGames(self, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["games"] + "?page=" + str(page)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getGamesInfo(self, gameId):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["games"] + "/" + str(gameId)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def favOrUnFavComic(self, comicId):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comicFavourite"].replace("{comicId}", comicId)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def likeOrUnLikeComic(self, comicId):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comicLike"].replace("{comicId}", comicId)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getComicComments(self, comicId, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["comicComments"].replace("{comicId}", comicId) + "?page=" + str(page)
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def postComments(self, comicId, content):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        url = self.urls["comicComments"].replace("{comicId}", comicId)
+        body = {
+            "content": content
+        }
+        self.headers["authorization"] = self.token
+        waziPicAcg.sign(self, url, "POST")
+        requestParams = self.request.handleParams(tempParams, "post", url, self.headers, self.proxies)
+        requestParams["data"] = json.dumps(body).encode()
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+    def getSinglePage(self, fileServer, path):
+        self.empty = ""
+        return fileServer + "/static/" + path
