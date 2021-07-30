@@ -113,9 +113,9 @@ class waziRequest:
         if self.useHeaders:
             # Sometimes(like some JSON Data), you have to json.dumps(yourData).encode() to request.
             # 有时候（比如面对某些 JSON 数据），你必须得先 json.dumps(你数据).encode() 才能发送请求。
-            request = urllib.request.Request(url = urllib.parse.quote(url), headers = self.headers, data = data)
+            request = urllib.request.Request(url = url, headers = self.headers, data = data)
         else:
-            request = urllib.request.Request(url = urllib.parse.quote(url))
+            request = urllib.request.Request(url = url)
         return urllib.request.urlopen(request)
 
     def do(self, params):
@@ -672,7 +672,7 @@ class waziExHentai:
             tags.append(tag.attrs["onclick"].split("'")[1])
         info = {
             "title": soup.h1.get_text(),
-            "jTitle": soup.find_all(id = "gdc")[0].get_text(),
+            "jTitle": soup.find_all(id = "gj")[0].get_text(),
             "cats": soup.find_all(id = "gdc")[0].div.get_text(),
             "tags": tags,
             "time": soup.find_all(class_ = "gdt2")[0].get_text(),
@@ -696,11 +696,17 @@ class waziExHentai:
             start = re.findall("<div.*?>", i.find_all(class_ = "c6")[0].prettify())[0]
             htmlComments = htmlComments.replace(start, "")
             htmlComments = htmlComments.replace("</div>", "")
+            try:
+                i.find(class_ = "c5 nosel").span.get_text()
+            except:
+                scores = "None / 不适用"
+            else:
+                scores = i.find(class_ = "c5 nosel").span.get_text()
             tempComments = {
                 "time": i.find(class_ = "c3").get_text().split(" by:")[0].split("Posted on ")[1],
                 "uploader": i.find(class_ = "c3").a.attrs["href"],
                 "uploaderName": i.find(class_ = "c3").a.get_text(),
-                "scores": i.find(class_ = "c5 nosel").span.get_text(),
+                "scores": scores,
                 "htmlComments": htmlComments
             }
             comments.append(tempComments)
@@ -720,8 +726,8 @@ class waziExHentai:
         }
         tempParams = self.params
         tempParams["useHeaders"] = True
-        tempParams["data"] = json.dumps(body).encode()
         requestParams = self.request.handleParams(tempParams, "post", self.urls["api"], headers, self.proxies)
+        requestParams["data"] = json.dumps(body).encode()
         return json.loads(self.request.do(requestParams).read())
 
     def getPages(self, link):
@@ -808,7 +814,7 @@ class waziExHentai:
             os.makedirs(os.path.join(params["path"], title))
 
     def getMPVImages(self, link, method, params = None):
-        mpvUrl = self.urls["mpv"] + link.split("/")[4] + link.split("/")[5]
+        mpvUrl = self.urls["mpv"] + link.split("/")[4] + "/" + link.split("/")[5]
         post = {
             "method": "imagedispatch",
             "gid": int(link.split("/")[4]),
@@ -988,8 +994,10 @@ class waziExHentai:
             return "No url return. / 没有返回 URL。"
         for i in links:
             requestParams = self.request.handleParams(tempParams, "get", i["link"], self.headers, self.proxies)
-            with open(os.path.join(params["path"], title, i["type"]), "wb") as f:
-                f.write(self.request.do(requestParams).read())
+            temp = self.request.do(requestParams)
+            fileName = temp.info().get_filename().encode("latin1").decode("utf-8")
+            with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
+                f.write(temp.read())
         return "Done! / 完工！"
 
 class waziPicAcg:
@@ -1074,7 +1082,7 @@ class waziPicAcg:
             "email": username,
             "password": password
         }
-        requestParams = self.request.handleParams(tempParams, "post", self.urls["api"], self.headers, self.proxies)
+        requestParams = self.request.handleParams(tempParams, "post", self.urls["login"], self.headers, self.proxies)
         requestParams["data"] = json.dumps(body).encode()
         jsons = json.loads(self.request.do(requestParams))
         self.token = jsons["data"]["token"]
@@ -1271,3 +1279,18 @@ class waziPicAcg:
     def getSinglePage(self, fileServer, path):
         self.empty = ""
         return fileServer + "/static/" + path
+
+    def punchIn(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["punchIn"], "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "post", self.urls["punchIn"], self.headers, self.proxies)
+        requestParams["data"] = None
+        jsons = json.loads(self.request.do(requestParams))
+        return jsons
+
+# [1]: 代码使用： https://github.com/WWILLV/iav （未注明详细的版权协议）
+# [2]: Api 参考： https://github.com/AnkiKong/picacomic （MIT 版权）
+#      Headers 引用： https://github.com/tonquer/picacg-windows （LGPL-3.0 版权）
+#      相关信息参考： https://www.hiczp.com/wang-luo/mo-ni-bi-ka-android-ke-hu-duan.html （版权归 czp，未注明详细的版权协议）
