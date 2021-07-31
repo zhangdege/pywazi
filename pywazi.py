@@ -469,7 +469,7 @@ class waziExHentai:
 
     def advancedSearch(self, params):
         url = self.urls["main"]
-        url += "?f_cats=" + waziCheck().getSources(params)
+        url += "?f_cats=" + str(waziCheck().getSources(params))
         if str(params["search"]):
             url += "&f_search=" + urllib.parse.quote(str(params["search"]))
         url += "&advsearch=1"
@@ -520,7 +520,7 @@ class waziExHentai:
     def customSearch(self, params):
         url = self.urls["main"]
         if "cats" in params:
-            url += "?f_cats=" + waziCheck().getSources(params)
+            url += "?f_cats=" + str(waziCheck().getSources(params))
         else:
             url += "?f_cats=0"
         url += "&f_search="
@@ -1310,4 +1310,3 @@ class waziPicAcg:
 # [2]: Api 参考： https://github.com/AnkiKong/picacomic （MIT 版权）
 #      Headers 引用： https://github.com/tonquer/picacg-windows （LGPL-3.0 版权）
 #      相关信息参考： https://www.hiczp.com/wang-luo/mo-ni-bi-ka-android-ke-hu-duan.html （版权归 czp，未注明详细的版权协议）
-
