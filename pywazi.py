@@ -269,8 +269,7 @@ class waziDanbooru:
         return self.api
 
     def getPosts(self, page, tags):
-        url = self.api + "/post.json?page" + str(page)
-        url += "&tags=" + urllib.parse.quote(tags)
+        url = urllib.parse.urljoin(self.api, "/post.json?page" + str(page) + "&tags=" + urllib.parse.quote(tags))
         tempParams = self.request.handleParams(self.params, "get", url, self.headers, self.proxies)
         return json.loads(self.request.do(tempParams).read())
 
@@ -284,7 +283,7 @@ class waziDanbooru:
             requestParams = self.request.handleParams(self.params, "get", i["file_url"], self.headers, self.proxies)
             # os.path.split is bad here. (Can't get filename extension)
             # os.path.split 在这里是坏的。 (无法获取文件扩展名）
-            fileName = path + "/" + str(i["id"]) + "." + i["file_url"].split(".")[-1]
+            fileName = os.path.join(path, str(i["id"]) + "." + i["file_url"].split(".")[-1])
             with open(fileName, "wb") as f:
                 f.write(self.request.do(requestParams).read())
             downloadFiles.append(fileName)
@@ -308,14 +307,25 @@ class waziJavBus:
             "proxyPort": "7890"
         }
         self.request = waziRequest()
+        self.url = "https://www.javbus.com/"
+        self.apiUrl = "https://www.javbus.com/"
+        self.useDomain = True
         self.params = {}
 
     def giveParams(self, params):
         self.params = params
         return self.params
 
+    def customUrl(self, url):
+        self.url = url
+        return self.url
+
+    def useDomainApi(self, boolean):
+        self.useDomain = boolean
+        return self.useDomain
+
     def getAjax(self, avId):
-        url = "https://www.javbus.com/" + avId
+        url = urllib.parse.urljoin(self.url, avId)
         tempHeaders = self.headers
         tempHeaders["Referer"] = url
         tempParams = self.params
@@ -332,7 +342,12 @@ class waziJavBus:
         gidPattern = re.compile(r"var gid = .*?;")
         match = gidPattern.findall(html)
         gid = match[0].replace("var gid = ", "").replace(";", "")
-        return "https://www.javbus.com/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc
+        if self.useDomain:
+            return urllib.parse.urljoin(self.apiUrl,
+                                        "ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc)
+        else:
+            return urllib.parse.urljoin(self.url,
+                                        "ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc)
 
     def getMagnet(self, avId):
         ajaxUrl = waziJavBus.getAjax(self, avId)
@@ -377,7 +392,8 @@ class waziExHentai:
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                           "Chrome/91.0.4472.164 Safari/537.36",
-            "Cookie": "",
+            "Connection": "keep-alive",
+            "Cookie": ""
         }
         self.proxies = {
             "proxyAddress": "127.0.0.1",
@@ -1294,3 +1310,4 @@ class waziPicAcg:
 # [2]: Api 参考： https://github.com/AnkiKong/picacomic （MIT 版权）
 #      Headers 引用： https://github.com/tonquer/picacg-windows （LGPL-3.0 版权）
 #      相关信息参考： https://www.hiczp.com/wang-luo/mo-ni-bi-ka-android-ke-hu-duan.html （版权归 czp，未注明详细的版权协议）
+
