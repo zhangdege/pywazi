@@ -3,6 +3,14 @@
 
 目前版本是 1.0.0，已经完成了大部分内容。并完成了 Danbooru, JavBus, ExHentai（部分） 的测试，因为 PicAcg 我的移动网络不允许，挂梯子也不行，所以还未测试。年底之前（草）我会把开发文档（中英文双版）整出来，优化和功能增加会在以后完成。
 
+## 开发文档
+详见 doc.md
+
+## TODO
+1. 想办法测试 picacg
+2. exhentai 那块单独用 http.client 写一个出来
+3. 写中英文版的文档
+
 ## 针对 Danbooru 的功能
 1. Posts 时间线
     1. 获取 Posts 时间线
