@@ -42,6 +42,7 @@ import json
 import time
 import uuid
 import hashlib
+import urllib3
 import urllib.parse
 import urllib.request
 from bs4 import BeautifulSoup
@@ -59,7 +60,7 @@ class waziRequest:
     def __init__(self):
         super(waziRequest, self).__init__()
         self.isUseProxies = True
-        self.proxies = {}
+        self.proxies = ""
         self.isUseHeaders = False
         self.headers = {
             "User-Agent": "Use Your UA.",
@@ -69,11 +70,11 @@ class waziRequest:
         self.isUseProxies = isUse
         return self.isUseProxies
 
-    def editProxies(self, https, port):
-        if https is None or port is None:
-            self.proxies["https"] = None
+    def editProxies(self, http, port):
+        if http is None or port is None:
+            self.proxies = None
         else:
-            self.proxies["https"] = https + ":" + str(port)
+            self.proxies = "http://" + http + ":" + str(port)
         return self.proxies
 
     def useHeaders(self, isUse):
@@ -92,31 +93,38 @@ class waziRequest:
         self.headers.pop(key)
         return self.headers
 
-    # If your domain has some Chinese or something else, you have to encode your url first.
-    # 如果你的域名中带有中文或其他字符，你必须得先编码你的 URL。
     def get(self, url):
-        if self.useProxies:
-            proxy = urllib.request.ProxyHandler(self.proxies)
-            opener = urllib.request.build_opener(proxy, urllib.request.HTTPHandler)
-            urllib.request.install_opener(opener)
-        if self.useHeaders:
-            request = urllib.request.Request(url = url, headers = self.headers)
+        if self.isUseProxies:
+            http = urllib3.ProxyManager(self.proxies)
         else:
-            request = urllib.request.Request(url = url)
-        return urllib.request.urlopen(request)
+            http = urllib3.PoolManager()
+        if self.isUseHeaders:
+            temp = http.request("GET", url, headers = self.headers)
+        else:
+            temp = http.request("GET", url)
+        return temp
 
     def post(self, url, data):
-        if self.useProxies:
-            proxy = urllib.request.ProxyHandler(self.proxies)
-            opener = urllib.request.build_opener(proxy, urllib.request.HTTPHandler)
-            urllib.request.install_opener(opener)
-        if self.useHeaders:
-            # Sometimes(like some JSON Data), you have to json.dumps(yourData).encode() to request.
-            # 有时候（比如面对某些 JSON 数据），你必须得先 json.dumps(你数据).encode() 才能发送请求。
-            request = urllib.request.Request(url = url, headers = self.headers, data = data)
+        if self.isUseProxies:
+            http = urllib3.ProxyManager(self.proxies)
         else:
-            request = urllib.request.Request(url = url)
-        return urllib.request.urlopen(request)
+            http = urllib3.PoolManager()
+        if self.isUseHeaders:
+            temp = http.request("POST", url, body = data, headers = self.headers)
+        else:
+            temp = http.request("POST", url, body = data)
+        return temp
+
+    def fieldsPost(self, url, data):
+        if self.isUseProxies:
+            http = urllib3.ProxyManager(self.proxies)
+        else:
+            http = urllib3.PoolManager()
+        if self.isUseHeaders:
+            temp = http.request("POST", url, headers = self.headers, fields = data)
+        else:
+            temp = http.request("POST", url, fields = data)
+        return temp
 
     def do(self, params):
         waziRequest.useProxies(self, params["useProxies"])
@@ -129,6 +137,8 @@ class waziRequest:
             return waziRequest.get(self, params["url"])
         elif params["method"].lower() == "post":
             return waziRequest.post(self, params["url"], params["data"])
+        elif params["method"].lower() == "fieldspost":
+            return waziRequest.fieldsPost(self, params["url"], params["data"])
         else:
             return "Sorry, method must be get or post. / 对不起，模式一定得是 GET 或者 POST 呜呜呜。"
 
@@ -271,7 +281,7 @@ class waziDanbooru:
     def getPosts(self, page, tags):
         url = urllib.parse.urljoin(self.api, "/post.json?page" + str(page) + "&tags=" + urllib.parse.quote(tags))
         tempParams = self.request.handleParams(self.params, "get", url, self.headers, self.proxies)
-        return json.loads(self.request.do(tempParams).read())
+        return json.loads(self.request.do(tempParams).data.decode("utf-8"))
 
     def downloadPosts(self, page, tags, path):
         lists = waziDanbooru.getPosts(self, page, tags)
@@ -285,7 +295,7 @@ class waziDanbooru:
             # os.path.split 在这里是坏的。 (无法获取文件扩展名）
             fileName = os.path.join(path, str(i["id"]) + "." + i["file_url"].split(".")[-1])
             with open(fileName, "wb") as f:
-                f.write(self.request.do(requestParams).read())
+                f.write(self.request.do(requestParams).data)
             downloadFiles.append(fileName)
         return downloadFiles
 
@@ -331,7 +341,7 @@ class waziJavBus:
         tempParams = self.params
         tempParams["useHeaders"] = True
         requestParams = self.request.handleParams(tempParams, "get", url, tempHeaders, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        soup = BeautifulSoup(self.request.do(requestParams).data.decode("utf-8"), "lxml")
         html = soup.prettify()
         imgPattern = re.compile(r"var img = '.*?'")
         match = imgPattern.findall(html)
@@ -354,7 +364,7 @@ class waziJavBus:
         tempParams = self.params
         tempParams["useHeaders"] = True
         requestParams = self.request.handleParams(tempParams, "get", ajaxUrl, self.headers, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        soup = BeautifulSoup(self.request.do(requestParams).data.decode("utf-8"), "lxml")
         avLists = []
         avDist = {"title": "", "magnet": "", "size": "", "date": ""}
         for tr in soup.find_all("tr"):
@@ -393,6 +403,7 @@ class waziExHentai:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                           "Chrome/91.0.4472.164 Safari/537.36",
             "Cookie": "",
+            "Connection": "keep-alive"
         }
         self.proxies = {
             "proxyAddress": "127.0.0.1",
@@ -649,13 +660,13 @@ class waziExHentai:
                     url += "&fs_exp="
                 else:
                     url = url
-        return waziExHentai.getBooks(self, url)
+        return [{"url": url}, waziExHentai.getBooks(self, url)]
 
     def returnSoup(self, link):
         tempParams = self.params
         tempParams["useHeaders"] = True
         requestParams = self.request.handleParams(tempParams, "get", link, self.headers, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams).read(), "lxml")
+        soup = BeautifulSoup(self.request.do(requestParams).data.decode("utf-8"), "lxml")
         return soup
 
     def getTorrent(self, link):
@@ -743,7 +754,7 @@ class waziExHentai:
         tempParams["useHeaders"] = True
         requestParams = self.request.handleParams(tempParams, "post", self.urls["api"], headers, self.proxies)
         requestParams["data"] = json.dumps(body).encode()
-        return json.loads(self.request.do(requestParams).read())
+        return json.loads(self.request.do(requestParams).data.decode("utf-8"))
 
     def getPages(self, link):
         soup = waziExHentai.returnSoup(self, link)
@@ -857,7 +868,7 @@ class waziExHentai:
             post["mpvkey"] = mpvkey
             requestParams = self.request.handleParams(tempParams, "post", self.urls["api"], tempHeaders, self.proxies)
             requestParams["data"] = json.dumps(post).encode()
-            lists = json.loads(str(self.request.do(requestParams).read(), encoding = "utf-8"))
+            lists = json.loads(self.request.do(requestParams).data.decode("utf-8"))
             if method == "get":
                 mpvLists.append({
                     "name": dic["n"],
@@ -866,7 +877,7 @@ class waziExHentai:
             if method == "download":
                 requestParams = self.request.handleParams(tempParams, "get", lists["i"], self.headers, self.proxies)
                 with open(os.path.join(params["path"], title, dic["n"]), "wb") as f:
-                    f.write(self.request.do(requestParams).read())
+                    f.write(self.request.do(requestParams).data)
                 mpvLists.append(os.path.join(params["path"], title, dic["n"]))
         return mpvLists
 
@@ -886,7 +897,7 @@ class waziExHentai:
             if method == "download":
                 requestParams = self.request.handleParams(tempParams, "get", src, self.headers, self.proxies)
                 with open(os.path.join(params["path"], title, src.split("/")[-1]), "wb") as f:
-                    f.write(self.request.do(requestParams).read())
+                    f.write(self.request.do(requestParams).data)
                 images.append(os.path.join(params["path"], title, src.split("/")[-1]))
         return images
 
@@ -911,8 +922,6 @@ class waziExHentai:
         url = soup.find_all(class_ = "g2 gsp")[0].a.attrs["onclick"].split("'")[1]
         soup = waziExHentai.returnSoup(self, url)
         archiveLists = []
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         action = soup.find_all("form")[0].attrs["action"]
         for i in soup.find_all("td"):
             if i.find_all("p")[1].get_text() == "N/A":
@@ -939,10 +948,9 @@ class waziExHentai:
         forms = {
             "hathdl_xres": code
         }
-        forms = urllib.parse.urlencode(forms).encode("utf-8")
         tempParams = self.params
         tempParams["useHeaders"] = True
-        requestParams = self.request.handleParams(tempParams, "post", link, self.headers, self.proxies)
+        requestParams = self.request.handleParams(tempParams, "fieldsPost", link, self.headers, self.proxies)
         requestParams["data"] = forms
         try:
             self.request.do(requestParams)
@@ -954,17 +962,20 @@ class waziExHentai:
     def parseArchives(self, form, action):
         tempParams = self.params
         tempParams["useHeaders"] = True
-        forms = urllib.parse.urlencode(form).encode("utf-8")
-        requestParams = self.request.handleParams(tempParams, "post", action, self.headers, self.proxies)
-        requestParams["data"] = forms
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
+        requestParams = self.request.handleParams(tempParams, "fieldsPost", action, self.headers, self.proxies)
+        requestParams["data"] = form
+        soup = BeautifulSoup(self.request.do(requestParams).data.decode("utf-8"), "lxml")
         tempUrl = soup.find_all("script")[0]
-        tempUrl = str(tempUrl).split("document.location = \"")[1].split("\";")[0]
-        requestParams = self.request.handleParams(tempParams, "get", tempUrl, self.headers, self.proxies)
-        soup = BeautifulSoup(self.request.do(requestParams), "lxml")
-        href = soup.find_all("a")[0].attrs["href"]
-        downloadLink = urllib.parse.urljoin(tempUrl, href)
-        return downloadLink
+        try:
+            tempUrl = str(tempUrl).split("document.location = \"")[1].split("\";")[0]
+        except:
+            return "None / 无"
+        else:
+            requestParams = self.request.handleParams(tempParams, "get", tempUrl, self.headers, self.proxies)
+            soup = BeautifulSoup(self.request.do(requestParams).data.decode("utf-8"), "lxml")
+            href = soup.find_all("a")[0].attrs["href"]
+            downloadLink = urllib.parse.urljoin(tempUrl, href)
+            return downloadLink
 
     def getArchives(self, link):
         soup = waziExHentai.returnSoup(self, link)
@@ -972,8 +983,6 @@ class waziExHentai:
         url = url.a.attrs["onclick"].split("'")[1]
         soup = waziExHentai.returnSoup(self, url)
         twoLists = []
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         action = soup.find_all("form")[0].attrs["action"]
         orgForms = {
             "dltype": "org",
@@ -1008,11 +1017,13 @@ class waziExHentai:
         if not links:
             return "No url return. / 没有返回 URL。"
         for i in links:
-            requestParams = self.request.handleParams(tempParams, "get", i["link"], self.headers, self.proxies)
-            temp = self.request.do(requestParams)
-            fileName = temp.info().get_filename().encode("latin1").decode("utf-8")
-            with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
-                f.write(temp.read())
+            if not i == "None / 无":
+                requestParams = self.request.handleParams(tempParams, "get", i["link"], self.headers, self.proxies)
+                temp = self.request.do(requestParams)
+                fileName = temp.headers["Content-Disposition"]
+                fileName = fileName.split("filename=\"")[1][:-1].encode("latin1").decode("utf-8")
+                with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
+                    f.write(temp.data)
         return "Done! / 完工！"
 
 class waziPicAcg:
@@ -1099,7 +1110,7 @@ class waziPicAcg:
         }
         requestParams = self.request.handleParams(tempParams, "post", self.urls["login"], self.headers, self.proxies)
         requestParams["data"] = json.dumps(body).encode()
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         self.token = jsons["data"]["token"]
 
     def getCategories(self):
@@ -1109,7 +1120,7 @@ class waziPicAcg:
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", self.urls["categories"], self.headers,
                                                   self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getComics(self, page, c, t, s):
@@ -1120,7 +1131,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def search(self, page, keyword):
@@ -1130,7 +1141,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getComic(self, comicId):
@@ -1140,7 +1151,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getComicEps(self, comicId, page):
@@ -1150,7 +1161,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def advancedSearch(self, categories, keyword, sort, page):
@@ -1166,7 +1177,7 @@ class waziPicAcg:
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "post", newUrl, self.headers, self.proxies)
         requestParams["data"] = json.dumps(body).encode()
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getComicPages(self, comicId, eps, page):
@@ -1176,7 +1187,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getComicRecommend(self, comicId):
@@ -1186,7 +1197,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getKeywords(self):
@@ -1195,7 +1206,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, self.urls["keywords"], "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", self.urls["keywords"], self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getMyComments(self, page):
@@ -1205,7 +1216,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getMyFavourites(self, page):
@@ -1215,7 +1226,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getMyProfile(self):
@@ -1224,7 +1235,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, self.urls["profile"], "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", self.urls["profile"], self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getGames(self, page):
@@ -1234,7 +1245,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getGamesInfo(self, gameId):
@@ -1244,7 +1255,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def favOrUnFavComic(self, comicId):
@@ -1254,7 +1265,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def likeOrUnLikeComic(self, comicId):
@@ -1264,7 +1275,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getComicComments(self, comicId, page):
@@ -1274,7 +1285,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def postComments(self, comicId, content):
@@ -1288,7 +1299,7 @@ class waziPicAcg:
         waziPicAcg.sign(self, url, "POST")
         requestParams = self.request.handleParams(tempParams, "post", url, self.headers, self.proxies)
         requestParams["data"] = json.dumps(body).encode()
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
     def getSinglePage(self, fileServer, path):
@@ -1302,7 +1313,7 @@ class waziPicAcg:
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "post", self.urls["punchIn"], self.headers, self.proxies)
         requestParams["data"] = None
-        jsons = json.loads(self.request.do(requestParams))
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
 # [1]: 代码使用： https://github.com/WWILLV/iav （未注明详细的版权协议）
