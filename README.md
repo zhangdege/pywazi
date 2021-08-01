@@ -8,8 +8,7 @@
 
 ## TODO
 1. 想办法测试 picacg
-2. exhentai 那块单独用 http.client 写一个出来
-3. 写中英文版的文档
+2. 写中英文版的文档
 
 ## 针对 Danbooru 的功能
 1. Posts 时间线
