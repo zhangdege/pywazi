@@ -1084,12 +1084,13 @@ class waziPicAcg:
             "punchIn": "https://picaapi.picacomic.com/users/punch-in"
         }
         self.request = waziRequest()
+        self.editHeaders()
 
     def giveParams(self, params):
         self.params = params
         return self.params
 
-    def headers(self):
+    def editHeaders(self):
         self.info["uuid"] = str(uuid.uuid4()).replace("-", "")
         self.headers["nonce"] = self.info["uuid"]
         self.headers["api-key"] = self.info["apiKey"]
