@@ -6,7 +6,7 @@
 
 ## 特别注明
 
-目前本人无法在 Windows 下使用 requests，原因不明，暂时不替换 urllib。
+暂时使用 urllib3，等我搓一个轮子出来。
 
 测试环境：
 
@@ -25,14 +25,14 @@
 > > beautifulsoup4 4.9.3
 > > certifi 2021.5.30
 > > lxml 4.6.3
-> > requests 2.25.1
+> > urllib3 1.26.6
 >
 > Packages in 3.8.8:
 >
 > > beautifulsoup4 4.9.3
 > > certifi 2020.12.5
 > > lxml 4.6.3
-> > requests 2.25.1
+> > urllib3 1.26.4
 
 ## 说明
 
@@ -42,7 +42,7 @@
 
 Python 3 代应该都可以吧（
 
-需要的是 beautifulsoup4 lxml 应该就够了
+需要的是 beautifulsoup4 lxml urllib4 应该就够了
 
 ## 开始
 
@@ -86,8 +86,8 @@ wdb = waziDanbooru()
 
 wdb.giveParams({
     "useProxies": True, # 是否使用代理
-    "proxyAddress": "127.0.0.1", # HTTPS 代理地址
-    "proxyPort": "7890", # HTTPS 代理端口
+    "proxyAddress": "127.0.0.1", # HTTPS / HTTP 代理地址
+    "proxyPort": "7890", # HTTPS / HTTP 代理端口
     "useHeaders": False, # 是否用自定义头部 （不建议填写，程序自动补充）
     "headers": {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -95,7 +95,7 @@ wdb.giveParams({
     } # 自定义头部内容 （不建议填写，程序自动补充，自己填写可能导致部分程序错误）
 })
 
-wdb.setApi("https://yande.re") # 设置域名 要求该 Danbooru 网站支持 https 协议
+wdb.setApi("https://yande.re") # 设置域名
 ```
 
 ### Posts 时间线
@@ -116,7 +116,7 @@ wdb.getPosts(0, "")
 
 返回格式为 JSON （取其中一例）：
 
-```
+```json
 [{
 	'id': 823891,
 	'tags': 'bikini erect_nipples swimsuits tomozero wet',
@@ -169,7 +169,7 @@ wdb.getPosts(0, "")
 		'user_id': None,
 		'flagged_by': 'system'
 	}
-},]
+}, ...]
 ```
 
 因为篇幅受限和各个 Danbooru 类网站返回的 JSON 格式都不一致，故无法详细解读。
@@ -206,8 +206,8 @@ wjb = waziJavBus()
 
 wjb.giveParams({
     "useProxies": True, # 是否使用代理
-    "proxyAddress": "127.0.0.1", # HTTPS 代理地址
-    "proxyPort": "7890", # HTTPS 代理端口
+    "proxyAddress": "127.0.0.1", # HTTPS / HTTP 代理地址
+    "proxyPort": "7890", # HTTPS / HTTP 代理端口
     "useHeaders": False, # 是否用自定义头部 （不建议填写，程序自动补充）
     "headers": {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -243,10 +243,9 @@ ExHentai 是 E-Hentai 的里站，需要有权限的账户才能进入（本人�
 并且请确保您的网络通顺，部分页面不能加载出来是因为：
 
 1. 你网不好，多试几次总能成的；
-2. 压根只返回了空页面，部分画廊会出现这样的情况，一个想法是用 `http.client` 重写一下；
-3. 你的账户看不了这个。
+2. 你的账户看不了这个。
 
-1 的话换个 DNS 换个梯子试试看，2 的话等我琢磨琢磨，3 的话借号去吧。
+1 的话换个 DNS 换个梯子试试看，2 的话借号去吧。
 
 ### 初始化并配置
 
@@ -257,8 +256,8 @@ wex = waziExHentai()
 
 wex.giveParams({
     "useProxies": True, # 是否使用代理
-    "proxyAddress": "127.0.0.1", # HTTPS 代理地址
-    "proxyPort": "7890", # HTTPS 代理端口
+    "proxyAddress": "127.0.0.1", # HTTPS / HTTP 代理地址
+    "proxyPort": "7890", # HTTPS / HTTP 代理端口
     "useHeaders": False, # 是否用自定义头部 （不建议填写，程序自动补充）
     "headers": {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -431,7 +430,7 @@ wex.imageSearch({
 
 #### 自定义搜索
 
-我非常推荐开发者使用自定义搜索来快速构建一个更为严谨的搜索模式。但是最气的就是有 BUG，同开头的第二条。
+我非常推荐开发者使用自定义搜索来快速构建一个更为严谨的搜索模式。
 
 ```python
 wex.customSearch({
