@@ -1019,11 +1019,15 @@ class waziExHentai:
         for i in links:
             if not i == "None / 无":
                 requestParams = self.request.handleParams(tempParams, "get", i["link"], self.headers, self.proxies)
-                temp = self.request.do(requestParams)
-                fileName = temp.headers["Content-Disposition"]
-                fileName = fileName.split("filename=\"")[1][:-1].encode("latin1").decode("utf-8")
-                with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
-                    f.write(temp.data)
+                try:
+                    temp = self.request.do(requestParams)
+                except:
+                    self.empty = ""
+                else:
+                    fileName = temp.headers["Content-Disposition"]
+                    fileName = fileName.split("filename=\"")[1][:-1].encode("latin1").decode("utf-8")
+                    with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
+                        f.write(temp.data)
         return "Done! / 完工！"
 
 class waziPicAcg:
@@ -1113,6 +1117,7 @@ class waziPicAcg:
         requestParams["data"] = json.dumps(body).encode()
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         self.token = jsons["data"]["token"]
+        return self.token
 
     def getCategories(self):
         tempParams = self.params
