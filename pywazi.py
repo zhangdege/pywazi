@@ -1085,7 +1085,9 @@ class waziPicAcg:
             "comicLike": "https://picaapi.picacomic.com/comics/{comicId}/like",
             "comicComments": "https://picaapi.picacomic.com/comics/{comicId}/comments",
             "advSearch": "https://picaapi.picacomic.com/comics/advanced-search",
-            "punchIn": "https://picaapi.picacomic.com/users/punch-in"
+            "punchIn": "https://picaapi.picacomic.com/users/punch-in",
+            "gameLike": "https://picaapi.picacomic.com/games/{gameId}/like",
+            "gameComments": "https://picaapi.picacomic.com/games/{gameId}/comments"
         }
         self.request = waziRequest()
         self.editHeaders()
@@ -1254,7 +1256,7 @@ class waziPicAcg:
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
-    def getGamesInfo(self, gameId):
+    def getGameInfo(self, gameId):
         tempParams = self.params
         tempParams["useHeaders"] = True
         newUrl = self.urls["games"] + "/" + str(gameId)
@@ -1264,13 +1266,25 @@ class waziPicAcg:
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
+    def likeOrUnLikeGame(self, gameId):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["gameLike"].replace("{gameId}", gameId)
+        waziPicAcg.sign(self, newUrl, "POST")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        requestParams["data"] = None
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
     def favOrUnFavComic(self, comicId):
         tempParams = self.params
         tempParams["useHeaders"] = True
         newUrl = self.urls["comicFavourite"].replace("{comicId}", comicId)
-        waziPicAcg.sign(self, newUrl, "GET")
+        waziPicAcg.sign(self, newUrl, "POST")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        requestParams["data"] = None
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
@@ -1278,9 +1292,34 @@ class waziPicAcg:
         tempParams = self.params
         tempParams["useHeaders"] = True
         newUrl = self.urls["comicLike"].replace("{comicId}", comicId)
+        waziPicAcg.sign(self, newUrl, "POST")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        requestParams["data"] = None
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    def getGameComments(self, gameId, page):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["gameComments"].replace("{gameId}", gameId) + "?page=" + str(page)
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    def postGameComment(self, gameId, content):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        url = self.urls["gameComments"].replace("{gameId}", gameId)
+        body = {
+            "content": content
+        }
+        self.headers["authorization"] = self.token
+        waziPicAcg.sign(self, url, "POST")
+        requestParams = self.request.handleParams(tempParams, "post", url, self.headers, self.proxies)
+        requestParams["data"] = json.dumps(body).encode()
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
@@ -1294,7 +1333,7 @@ class waziPicAcg:
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
-    def postComments(self, comicId, content):
+    def postComicComment(self, comicId, content):
         tempParams = self.params
         tempParams["useHeaders"] = True
         url = self.urls["comicComments"].replace("{comicId}", comicId)
@@ -1315,7 +1354,7 @@ class waziPicAcg:
     def punchIn(self):
         tempParams = self.params
         tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["punchIn"], "GET")
+        waziPicAcg.sign(self, self.urls["punchIn"], "POST")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "post", self.urls["punchIn"], self.headers, self.proxies)
         requestParams["data"] = None
@@ -1326,3 +1365,4 @@ class waziPicAcg:
 # [2]: Api 参考： https://github.com/AnkiKong/picacomic （MIT 版权）
 #      Headers 引用： https://github.com/tonquer/picacg-windows （LGPL-3.0 版权）
 #      相关信息参考： https://www.hiczp.com/wang-luo/mo-ni-bi-ka-android-ke-hu-duan.html （版权归 czp，未注明详细的版权协议）
+#      我参考了一位开源者的代码，但是很可惜，我已经在 GitHub 找不到他的项目了。
