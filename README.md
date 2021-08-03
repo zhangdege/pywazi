@@ -6,9 +6,6 @@
 ## 使用说明
 详见 doc.md
 
-## TODO
-1. 写文档
-
 ## 针对 Danbooru 的功能
 1. Posts 时间线
     1. 获取 Posts 时间线
