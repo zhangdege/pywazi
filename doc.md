@@ -6,7 +6,9 @@
 
 ## 特别注明
 
-暂时使用 urllib3，等我搓一个轮子出来。
+暂时使用 urllib3，等我搓一个轮子出来。有时间再搓一个用 requests 的玩玩。
+
+> 我将可能的，含有隐私的内容进行了一个码的打。
 
 测试环境：
 
@@ -116,7 +118,7 @@ wdb.getPosts(0, "")
 
 返回格式为 JSON （取其中一例）：
 
-```json
+```
 [{
 	'id': 823891,
 	'tags': 'bikini erect_nipples swimsuits tomozero wet',
@@ -542,7 +544,7 @@ wex.getComments("https://exhentai.org/g/1948847/f81687b96e/")
 返回为 JSON：
 
 ```
-[{'time': '02 July 2021, 17:41', 'uploader': 'https://exhentai.org/uploader/%E9%82%A3%E7%8F%82%E3%81%A1%E3%82%83%E3%82%93', 'uploaderName': '那珂ちゃん', 'scores': 'None / 不适用', 'htmlComments': '\n https://fantia.jp/posts/615177\n <br/>\n <br/>\n <a href="https://exhentai.org/s/0dcc07ddde/1948847-1">\n  001~010 文字あり\n </a>\n <br/>\n <a href="https://exhentai.org/s/0e34105f9a/1948847-11">\n  011~020 文字なし\n </a>\n\n'}, {'time': '30 July 2021, 04:56', 'uploader': 'https://exhentai.org/uploader/pop9', 'uploaderName': 'pop9', 'scores': '+76', 'htmlComments': '\n https://ehwiki.org/wiki/japanese\n <br/>\n <br/>\n Default language flag;\n <strong>\n  do NOT use this tag\n </strong>\n outside of legitimate dual-language galleries and translations to Japanese.\n\n'}]
+[{'time': '02 July 2021, 17:41', 'uploader': 'https://exhentai.org/uploader/%E9%82%A3%E7%8F%82%E3%81%A1%E3%82%83%E3%82%93', 'uploaderName': '那珂ちゃん', 'scores': 'None / 不适用', 'htmlComments': '\n https://fantia.jp/posts/615177\n <br/>\n <br/>\n <a href="https://exhentai.org/s/0dcc07ddde/1948847-1">\n  001~010 文字あり\n </a>\n <br/>\n <a href="https://exhentai.org/s/0e34105f9a/1948847-11">\n  011~020 文字なし\n </a>\n\n'}, {'time': '30 July 2021, 04:56', 'uploader': 'https://exhentai.org/uploader/[打码]', 'uploaderName': '[打码]', 'scores': '+76', 'htmlComments': '\n https://ehwiki.org/wiki/japanese\n <br/>\n <br/>\n Default language flag;\n <strong>\n  do NOT use this tag\n </strong>\n outside of legitimate dual-language galleries and translations to Japanese.\n\n'}]
 ```
 
 `time` 表示评论时间，`uploader` 表示评论者主页，`uploaderName` 表示评论者昵称，`scores` 表示评分，`htmlComments` 表示 html 版本的评论。
@@ -656,7 +658,7 @@ download 返回：
 ```python
 wex.getArchivesHATH("https://exhentai.org/g/1948847/f81687b96e/")
 
-# 本子 url
+# 本子 url。
 ```
 
 返回 JSON （取一例）：
@@ -671,6 +673,8 @@ wex.getArchivesHATH("https://exhentai.org/g/1948847/f81687b96e/")
 
 ```python
 wex.toHATH("https://exhentai.org/archiver.php?gid=1948847&token=f81687b96e&or=452154-1c41df26535532bfc35cff7874319017afed3418", "780")
+
+# getArchivesHATH 返回的 url 和 code
 ```
 
 如果返回 `Done! / 完成！` 就表示成了，否则，按照提示做。
@@ -680,7 +684,7 @@ wex.toHATH("https://exhentai.org/archiver.php?gid=1948847&token=f81687b96e&or=45
 ```python
 wex.getArchives("https://exhentai.org/g/1948847/f81687b96e/")
 
-# 本子 url
+# 本子 url。
 ```
 
 返回 JSON （取一例）：
@@ -696,12 +700,678 @@ wex.getArchives("https://exhentai.org/g/1948847/f81687b96e/")
 ```python
 wex.downloadArchives("https://exhentai.org/g/1948847/f81687b96e/", {"path": "./download", "japanese": True})
 
-# 本子 url
-# 后面 path 表示你的下载路径 相对和绝对都可以
-# japanese 如果是 True 那么使用日文名文件名
+# 本子 url。
+# 后面 path 表示你的下载路径 相对和绝对都可以。
+# japanese 如果是 True 那么使用日文名文件名。
 ```
 
 因为我从来没下载完过，就不清楚是否能正常返回最后预定的格式了。
 
 返回 410 就是说，你现在没法下载了。
 
+## waziPicAcg 教程
+
+### 初始化并配置
+
+```python
+from pywazi import waziPicAcg
+
+wpa = waziPicAcg()
+
+wpa.giveParams({
+    "useProxies": True, # 是否使用代理
+    "proxyAddress": "127.0.0.1", # HTTPS / HTTP 代理地址
+    "proxyPort": "7890", # HTTPS / HTTP 代理端口
+    "useHeaders": False, # 是否用自定义头部 （不建议填写，程序自动补充）
+    "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/91.0.4472.164 Safari/537.36"
+    } # 自定义头部内容 （你填了我估计没法访问）
+})
+
+wpa.login("你的用户名", "你的密码")
+```
+
+正常登陆后返回一串 token，如果失败了，大概率是：
+
+1. 网络问题，一开始我就进了这坑；
+2. 时间同步问题，尤其是双系统（Windows + Linux）刚装好的；
+3. 账号密码不对或不存在；
+4. （偶尔）重大更新了。
+
+### 获取分区
+
+```python
+wpa.getCategories()
+```
+
+返回 （JSON）：
+
+```
+{
+	'code': 200,
+	'message': 'success',
+	'data': {
+		'categories': [{
+			'title': '援助嗶咔',
+			'thumb': {
+				'originalName': 'help.jpg',
+				'path': 'help.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'active': True,
+			'link': 'https://donate.wikawika.xyz'
+		}, {
+			'title': '嗶咔小禮物',
+			'thumb': {
+				'originalName': 'picacomic-gift.jpg',
+				'path': 'picacomic-gift.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'link': 'https://gift-web.wikawika.xyz',
+			'active': True
+		}, {
+			'title': '小電影',
+			'thumb': {
+				'originalName': 'av.jpg',
+				'path': 'av.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'link': 'https://av.wikawika.xyz',
+			'active': True
+		}, {
+			'title': '小里番',
+			'thumb': {
+				'originalName': 'h.jpg',
+				'path': 'h.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'link': 'https://h.wikawika.xyz',
+			'active': True
+		}, {
+			'title': '嗶咔畫廊',
+			'thumb': {
+				'originalName': 'picacomic-paint.jpg',
+				'path': 'picacomic-paint.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'link': 'https://paint-web.wikawika.xyz',
+			'active': True
+		}, {
+			'title': '嗶咔鍋貼',
+			'thumb': {
+				'originalName': 'picacomic-post.jpg',
+				'path': 'picacomic-post.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'link': 'https://post-web.wikawika.xyz',
+			'active': True
+		}, {
+			'title': '嗶咔商店',
+			'thumb': {
+				'originalName': 'picacomic-shop.jpg',
+				'path': 'picacomic-shop.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'link': 'https://online-shop-web.wikawika.xyz',
+			'active': True
+		}, {
+			'title': '大家都在看',
+			'thumb': {
+				'originalName': 'every-see.jpg',
+				'path': 'every-see.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': False,
+			'active': True
+		}, {
+			'title': '下雨了呢',
+			'thumb': {
+				'originalName': 'recommendation.jpg',
+				'path': '829847d3-36ab-4357-834f-676411041554.jpg',
+				'fileServer': 'https://storage1.picacomic.com'
+			},
+			'isWeb': False,
+			'active': True
+		}, {
+			'title': '那年今天',
+			'thumb': {
+				'originalName': 'old.jpg',
+				'path': 'old.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': False,
+			'active': True
+		}, {
+			'title': '官方都在看',
+			'thumb': {
+				'originalName': 'promo.jpg',
+				'path': 'promo.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': False,
+			'active': True
+		}, {
+			'title': '嗶咔運動',
+			'thumb': {
+				'originalName': 'picacomic-move-cat.jpg',
+				'path': 'picacomic-move-cat.jpg',
+				'fileServer': 'https://wikawika.xyz/static/'
+			},
+			'isWeb': True,
+			'active': True,
+			'link': 'https://move-web.wikawika.xyz'
+		}, {
+			'_id': '5821859b5f6b9a4f93dbf6e9',
+			'title': '嗶咔漢化',
+			'description': '未知',
+			'thumb': {
+				'originalName': 'translate.png',
+				'path': 'f541d9aa-e4fd-411d-9e76-c912ffc514d1.png',
+				'fileServer': 'https://storage1.picacomic.com'
+			}
+		}, {
+			'_id': '5821859b5f6b9a4f93dbf6d1',
+			'title': '全彩',
+			'description': '未知',
+			'thumb': {
+				'originalName': '全彩.jpg',
+				'path': '8cd41a55-591c-424c-8261-e1d56d8b9425.jpg',
+				'fileServer': 'https://storage1.picacomic.com'
+			}
+		}, {
+			'_id': '5821859b5f6b9a4f93dbf6cd',
+			'title': '長篇',
+			'description': '未知',
+			'thumb': {
+				'originalName': '長篇.jpg',
+				'path': '681081e7-9694-436a-97e4-898fc68a8f89.jpg',
+				'fileServer': 'https://storage1.picacomic.com'
+			}
+		}, ...
+		}]
+	}
+}
+```
+
+### 获取热词
+
+```python
+wpa.getKeywords()
+```
+
+返回：
+
+```
+{'code': 200, 'message': 'success', 'data': {'keywords': ['乳汁', '短髮', '全彩', '自慰', '吞精', '橫切面', '無修正', '
+短篇合集', '校園', '人外娘', '開大車']}}
+```
+
+### 搜索
+
+分了三类：`Comics` 模式、关键字模式和高级模式。
+
+#### Comics 模式
+
+```python
+wpa.getComics("1", "足の恋", "全彩", "ua")
+
+# 第一位参数表示页码，从 1 计数。
+# 第二位参数表示分区名字，应当为 categories 里面的 title。
+# 第三位参数表示标签名字，由 info 返回数据里面的 tags 获得。
+# 第四位参数表示排序依据，分别为：
+# 	ua -> 默认排序
+#	dd -> 从新到旧
+#	da -> 从旧到新
+#	vd -> 最多绅士指名
+#	ld -> 最多爱心
+```
+
+返回 JSON：
+
+```
+{
+	'code': 200,
+	'message': 'success',
+	'data': {
+		'comics': {
+			'docs': [{
+				'_id': '610399ae3a8a1824a38ec6d2',
+				'title': ' How to use dolls RE',
+				'author': 'ooyun',
+				'totalViews': 138134,
+				'totalLikes': 2122,
+				'pagesCount': 35,
+				'epsCount': 1,
+				'finished': True,
+				'categories': ['短篇', '同人', '全彩', '足の恋', '純愛', '後宮閃光'],
+				'thumb': {
+					'originalName': '00.jpg',
+					'path': 'tobeimg/qjKm0jTW70tSw0IyEa-hSI5aMgTLre9aDOa-0nqriSU/fill/300/400/sm/0/aHR0cHM6Ly9zdG9yYWdlMS5waWNhY29taWMuY29tL3N0YXRpYy9kYmQ3MDkyZi01ZjJiLTQ0Y2EtODMyZC01M2NlZjM1MzAxZDkuanBn.jpg',
+					'fileServer': 'https://storage1.picacomic.com'
+				},
+				'id': '610399ae3a8a1824a38ec6d2',
+				'likesCount': 2122
+			}, ...],
+			'total': 83,
+			'limit': 20,
+			'page': 1,
+			'pages': 5
+		}
+	}
+}
+```
+
+#### 关键词搜索
+
+```python
+wpa.search("1", "伪娘")
+
+# 第一位参数表示页码，从 1 计数。
+# 第二位参数表示关键词。
+```
+
+返回格式同上。
+
+#### 高级搜索
+
+```python
+wpa.advancedSearch(["偽娘哲學"], "全彩", "ld", 1)
+
+# 第一位表示分区，支持多个分区，应当为 list 类型，若不想要可以直接填写 []。
+# 第二位表示搜索的关键词。
+# 第三位表示排序方式。
+# 第四位表示页码，从 1 计数。
+```
+
+### 漫画
+
+PS: 漫画下面的 `「进行评论」` 功能鄙人不敢测试（
+
+#### 基本信息
+
+```python
+wpa.getComic("60f5aab6e239c4708507c5d9")
+
+# 第一位表示漫画 ID，_id 中可见。
+```
+
+返回 JSON：
+
+```
+{'code': 200, 'message': 'success', 'data': {'comic': {'_id': '60f5aab6e239c4708507c5d9', '_creator': {'_id': '58b2fe52288c3778fcbaba4d', 'gender': 'f', 'name': 'Selestial', 'verified': False, 'exp': 4586, 'level': 7, 'characters': ['knight'], 'role': 'knight', 'title': '萌新', 'avatar': {'originalName': 'avatar.jpg', 'path': 'f959bc38-94c0-4793-bc02-b1465d74f0bc.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'slogan': '......', 'character': 'https://pica-web.wakamoment.tk/images/halloween_f.png'}, 'title': 'ホクロ流星群せかんど [中国翻訳] [DL版]', 'description': '早该好好学学了\n（05 后别看05后别看05后别看）', 'thumb': {'originalName': 'QQ图片20210718224515.png', 'path': 'tobeimg/Gxkeem7A4h_VvYKYnIJbQx3ZCAcWFNj38-CFbeOfhZ4/fill/300/400/sm/0/aHR0cHM6Ly9zdG9yYWdlMS5waWNhY29taWMuY29tL3N0YXRpYy9jMjJjODVjNi0yYzUzLTQxMWQtYmIwNi1jZjg0NzBmZGVmZmEucG5n.png', 'fileServer': 'https://storage1.picacomic.com'}, 'author': '書肆マガジンひとり (ホクロ流 星群)', 'chineseTeam': '观星能治颈椎病个人渣翻', 'categories': ['偽娘哲學', '全彩', '短篇'], 'tags': ['偽娘', '口交', ' 制服', '雌墜', '女裝'], 'pagesCount': 30, 'epsCount': 1, 'finished': True, 'updated_at': '2021-07-19T16:39:18.121Z', 'created_at': '2021-07-18T15:12:14.015Z', 'allowDownload': True, 'allowComment': True, 'totalLikes': 438, 'totalViews': 51574, 'viewsCount': 51574, 'likesCount': 438, 'isFavourite': False, 'isLiked': False, 'commentsCount': 97}}}
+```
+
+#### 分页
+
+```python
+wpa.getComicEps("60f5aab6e239c4708507c5d9", "1")
+
+# 第一位表示漫画 ID。
+# 第二位表示第几个分页
+# 返回的 epsCount 中注明了有几个分页
+```
+
+返回 JSON：
+
+```
+{'code': 200, 'message': 'success', 'data': {'eps': {'docs': [{'_id': '60f5aab6e239c4708507c5da', 'title': '第1話', 'order': 1, 'updated_at': '2021-07-18T15:17:47.711Z', 'id': '60f5aab6e239c4708507c5da'}], 'total': 1, 'limit': 40, 'page': 1, 'pages': 1}}}
+```
+
+#### 分页内容
+
+```python
+wpa.getComicPages("60f5aab6e239c4708507c5d9", "1", "1")
+
+# 第一位表示漫画 ID。
+# 第二位表示第几个分页。
+# 第三位表示第几页。
+# 返回的 pages 注明了全部页码 page 表示现在是第几页。
+```
+
+返回 JSON：
+
+```
+{
+	'code': 200,
+	'message': 'success',
+	'data': {
+		'pages': {
+			'docs': [{
+				'_id': '60f5aab6e239c4708507c5db',
+				'media': {
+					'originalName': '00.jpg',
+					'path': 'tobeimg/wHyKO5BdzvRZkBugyFPJV0PsDVWI0a6_jDL6FuYISJE/fit/800/800/ce/0/aHR0cHM6Ly9zdG9yYWdlMS5waWNhY29taWMuY29tL3N0YXRpYy8xODU4MzQ0YS1jNTA3LTRhNWYtODYzMC0zYmFiZDYyYWM1ODUuanBn.jpg',
+					'fileServer': 'https://storage1.picacomic.com'
+				},
+				'id': '60f5aab6e239c4708507c5db'
+			}, ...],
+			'total': 31,
+			'limit': 40,
+			'page': 1,
+			'pages': 1
+		},
+		'ep': {
+			'_id': '60f5aab6e239c4708507c5da',
+			'title': '第1話'
+		}
+	}
+}
+```
+
+#### 漫画推荐
+
+不知道是不是我写错了，为什么总是不推荐内容。
+
+```python
+wpa.getComicRecommend("60f5aab6e239c4708507c5d9")
+
+# 第一位表示漫画 ID。
+```
+
+返回 JSON：
+
+```
+{'code': 200, 'message': 'success', 'data': {'comics': []}}
+```
+
+如果能返回 comics 的话，应该同：[AnkiKong/picacomic: 哔咔漫画相关api (github.com)](https://github.com/AnkiKong/picacomic#recommend-看了這本子的人也在看) 一致。
+
+#### 喜欢或取消喜欢
+
+```python
+wpa.likeOrUnLikeComic("60f5aab6e239c4708507c5d9")
+
+# 第一位表示漫画 ID。
+```
+
+返回 JSON：
+
+```
+{'code': 200, 'message': 'success'}
+```
+
+第一次是喜欢，第二次是取消喜欢。
+
+#### 收藏或取消收藏
+
+```python
+wpa.favOrUnFavComic("60f5aab6e239c4708507c5d9")
+
+# 第一位表示漫画 ID。
+```
+
+返回 JSON：
+
+```
+{'code': 200, 'message': 'success'}
+```
+
+同上：第一次是收藏，第二次是取消收藏。
+
+#### 获取评论
+
+```python
+wpa.getComicComments("60f5aab6e239c4708507c5d9", "1")
+
+# 第一位表示漫画 ID。
+# 第二位表示评论页码。
+```
+
+返回 JSON：
+
+而且这个 JSON 我删掉了好多评论，可能误删了其他内容。
+
+```
+{'code': 200, 'message': 'success', 'data': {'comments': {'docs': [{'_id': '61053f8efde353772059fbac', 'content': '有洗
+脑的味儿了', '_user': {'_id': '58c2f6da3f5ca24bed33a10e', 'gender': 'm', 'name': '[打码]', 'verified': False, 'exp': 1405, 'level': 4, 'characters': [], 'role': 'member', 'avatar': {'originalName': 'avatar.jpg', 'path': 'c8bf310f-999b-4d57-81f0-673e0dec67f3.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'title': '[打码]', 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_m.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-31T12:18:22.870Z', 'id': '61053f8efde353772059fbac', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}, {'_id': '6102101969279b6daec6d2e5', 'content': '小朋友们 快跑啊——\n(未成年请在家长陪同下观看)', '_user': {'_id': '5b93df6fa45b9d65304f4ab7', 'gender': 'bot', 'name': '[打码]', 'title': '[打码]', 'verified': False, 'exp': 3570, 'level': 6, 'characters': [], 'role': 'member', 'avatar': {'fileServer': 'https://storage1.picacomic.com', 'path': 'ae492e1b-cc43-4b10-8a84-30574759cbf2.jpg', 'originalName': 'avatar.jpg'}, 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_bot.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-29T02:19:05.590Z', 'id': '6102101969279b6daec6d2e5', 'likesCount': 4, 'commentsCount': 0, 'isLiked': False}, {'_id': '61010b14e65322b6796ff730', 'content': 'hso', '_user': {'_id': '5bf0e5dc0fdd3c38c9517afa', 'gender': 'm', 'name': '[打码]', 'title': '[打码]', 'verified': False, 'exp': 210, 'level': 2, 'characters': [], 'role': 'member', 'avatar': {'fileServer': 'https://storage1.picacomic.com', 'path': '6bc97079-8404-4e91-96f3-ae2c7914e85d.jpg', 'originalName': 'avatar.jpg'}, 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_m.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-28T07:45:24.006Z', 'id': '61010b14e65322b6796ff730', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}, {'_id': '60fef9011ba3a4b65a7ba877', 'content': '可以', '_user': {'_id': '584ecc8b0554fd247dd63194', 'gender': 'm', 'name': '[打码]', 'verified': False, 'exp': 825, 'level': 3, 'characters': [], 'role': 'member', 'avatar': {'originalName': 'avatar.jpg', 'path': '7e53d9e5-7dd8-4a1b-aed4-23757c17f7d5.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'title': '[打码]', 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_m.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-26T18:03:45.405Z', 'id': '60fef9011ba3a4b65a7ba877', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}, {'_id': '60fe2dc8273afa59289d02b6', 'content': '[打码]', '_user': {'_id': '5b624f89baa50311bef929cf', 'gender': 'm', 'name': '[打码]', 'title': '[打码]', 'verified': False, 'exp': 390, 'level': 2, 'characters': [], 'role': 'member', 'avatar': {'originalName': 'avatar.jpg', 'path': '69009713-1b8f-4a75-b2d3-3351a801adc3.jpg', 'fileServer': 'https://storage1.picacomic.com'}}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-26T03:36:40.134Z', 'id': '60fe2dc8273afa59289d02b6', 'likesCount': 11, 'commentsCount': 0, 'isLiked': False},, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-22T07:04:32.970Z', 'id': '60f91880281d48c9b80eac72', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}], 'total': 70, 'limit': 20, 'page': '1', 'pages': 4}, 'topComments': []}}
+```
+
+#### 发表评论
+
+```python
+wpa.postComicComment("60f5aab6e239c4708507c5d9", "支持")
+
+# 第一位表示漫画 ID。
+# 第二位表示评论内容。
+```
+
+我不清楚会返回什么，我没那个勇气发表高见。
+
+### 游戏
+
+有时候不太想看本子，就想在手机上玩玩 Gal。
+
+#### 游戏列表
+
+```python
+wpa.getGames(1)
+
+# 第一位表示分页，从 1 数起。
+```
+
+返回 JSON：
+
+```
+{
+	'code': 200,
+	'message': 'success',
+	'data': {
+		'games': {
+			'docs': [{
+				'_id': '60f6a6cf77a54e70a918f3d4',
+				'title': '機甲戰姬',
+				'version': '1.0.0',
+				'publisher': 'JG Game',
+				'suggest': False,
+				'adult': False,
+				'android': True,
+				'ios': False,
+				'icon': {
+					'originalName': 'gumdam_APP - 250.png',
+					'path': '90ac9d84-e8d5-456e-a805-3dce8449dad3.png',
+					'fileServer': 'https://storage1.picacomic.com'
+				}
+			}, {
+				'_id': '5ded08947cd2ce4ed0f5e101',
+				'title': '真愛の百合は赤く染まる',
+				'version': '1.0.0',
+				'publisher': 'バグシステム',
+				'suggest': False,
+				'adult': True,
+				'android': True,
+				'ios': True,
+				'icon': {
+					'originalName': '2019-12-09 23.29.05.jpg',
+					'path': '260034ca-77b3-458a-99c1-1eb11b3a05a4.jpg',
+					'fileServer': 'https://storage1.picacomic.com'
+				}
+			}, ...],
+			'total': 133,
+			'limit': 100,
+			'page': 1,
+			'pages': 2
+		}
+	}
+}
+```
+
+#### 游戏信息
+
+```python
+wpa.getGameInfo("5ded08947cd2ce4ed0f5e101")
+
+# 第一位表示游戏 ID，在 _id 中可见。
+```
+
+返回 JSON：
+
+```
+{'code': 200, 'message': 'success', 'data': {'game': {'_id': '5ded08947cd2ce4ed0f5e101', 'title': '真愛の百合は赤く染ま
+る', 'description': '----------團長特別警告!!----------\n\n純愛大作，厄夜良心推薦。\n親自測試，絕對無雷!\n(๑•̀ᄇ•́)و ✧\n\n物語的主人公「真奈美」最近剛搬到了一個新的小鎮裡，而身為蕾絲的她暗地裡對同班同學的「愛實」抱有著愛意。\n\n一直嘗試隱藏的這份感情卻被對方輕易看穿，而真奈美也從她那聽到了令人驚愕的發言——\n\n「我其實也……喜歡女孩子」\n\n心意相通的兩人很快便確立了關系，然而這份關系卻隨著時間的流逝漸漸變質得不可名狀。「MANAMI」到底能滿足「MANAMI」到什麼程度呢。不久，這份異常的緣分便將她們以外的人們也卷入了事件的漩渦當中，而本應純情的物語也開始大幅度地產生扭曲……\n\n請用zarchiver解壓，用krkr2玩耍。', 'version': '1.0.0', 'icon': {'originalName': '2019-12-09 23.29.05.jpg', 'path': '260034ca-77b3-458a-99c1-1eb11b3a05a4.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'publisher': 'バグシステム', 'ios': True, 'iosLinks': ['https://game.eroge.xyz/hhh.php?id=106'], 'android': True, 'androidLinks': ['https://game.eroge.xyz/hhh.php?id=106'], 'adult': True, 'suggest': False, 'downloadsCount': 0, 'screenshots': [{'originalName': '2019-12-09 23.29.10.jpg', 'path': 'ad636f7b-cbbd-474a-81f4-ce1509eda319.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.14.jpg', 'path': '11ccbab5-8673-4be6-b1bd-f8f9c5687fa9.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.18.jpg', 'path': '36d49e43-36b6-4075-9447-1d7ebe460f6e.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.22.jpg', 'path': '142140b8-b5bf-47d7-bc0e-4648c79a9290.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.25.jpg', 'path': '8e0d66c7-daf9-4dc6-8479-7492bd2fddfd.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.29.jpg', 'path': '33eb34ae-e21e-4c4d-a131-bc4bc14fadb0.jpg', 'fileServer': 'https://storage1.picacomic.com'}], 'androidSize': 632.23, 'iosSize': 632.23, 'updated_at': '2020-06-03T14:27:27.042Z', 'created_at': '2019-12-08T14:28:36.369Z', 'likesCount': 8870, 'isLiked': False, 'commentsCount': 1291}}}
+```
+
+#### 喜欢或取消喜欢
+
+```python
+wpa.likeOrUnLikeGame("5ded08947cd2ce4ed0f5e101")
+
+# 第一位表示游戏 ID。
+```
+
+同漫画喜欢：第一次是喜欢，第二次是取消喜欢，返回内容不再赘述。
+
+#### 获取评论
+
+```python
+wpa.getGameComments("5ded08947cd2ce4ed0f5e101", "1")
+
+# 第一位表示游戏 ID。
+# 第二位表示评论区分页，从 1 数起。
+```
+
+返回 JSON，同漫画的获取评论一致，返回内容不再赘述。
+
+#### 发表评论
+
+```python
+wpa.postGameComment("5ded08947cd2ce4ed0f5e101", "非常支持")
+
+# 第一位表示游戏 ID。
+# 第二位表示评论内容。
+```
+
+我说白了，我不敢评论，不敢测试，你们自己试试看。
+
+### 个人
+
+获取基本的个人信息（就你自己）
+
+#### 评论
+
+```python
+wpa.getMyComments("1")
+
+# 第一位表示分页，从 1 数起。
+```
+
+因为我没评论，返回的 JSON 是空的：
+
+```
+{'code': 200, 'message': 'success', 'data': {'comments': {'docs': [], 'total': 0, 'limit': 20, 'page': '1', 'pages': 1}}}
+```
+
+#### 收藏
+
+```python
+wpa.getMyFavourites("1")
+
+# 第一位表示分页，从 1 数起。
+```
+
+返回 JSON：
+
+```
+{
+	'code': 200,
+	'message': 'success',
+	'data': {
+		'comics': {
+			'pages': 12,
+			'total': 231,
+			'docs': [{
+				'_id': '58ab30dea34f167444930a44',
+				'title': '鹿島で足コキ48手 (艦隊これくしょん -艦これ-)',
+				'author': '嘘つき屋 (大嘘)',
+				'pagesCount': 65,
+				'epsCount': 1,
+				'finished': True,
+				'categories': ['同人', '短篇', '足の恋', '艦隊收藏'],
+				'thumb': {
+					'originalName': '2.jpg',
+					'path': '91cf2d7e-fc35-47bb-b0db-99be58a4a2da.jpg',
+					'fileServer': 'https://storage1.picacomic.com'
+				},
+				'totalViews': 425305,
+				'totalLikes': 10114,
+				'likesCount': 10114
+			}, {
+				'_id': '5ec2bdc1e2a7bd11c7fb4cce',
+				'title': '(C98) ジェントルコネクト!Re:Dive 2 「Amakuchi」(プリンセスコネクト!ReDive) [中国翻訳]',
+				'author': 'けんじゃたいむ (MANA)',
+				'totalViews': 593647,
+				'totalLikes': 10689,
+				'pagesCount': 22,
+				'epsCount': 1,
+				'finished': True,
+				'categories': ['全彩', '短篇', '同人', '純愛', '後宮閃光', '非人類'],
+				'thumb': {
+					'originalName': '000.jpg',
+					'path': 'b1c4d4b9-522d-4ee9-90a6-6acaf1eb51d1.jpg',
+					'fileServer': 'https://storage1.picacomic.com'
+				},
+				'likesCount': 10689
+			}, ...],
+			'page': 1,
+			'limit': 20
+		}
+	}
+}
+```
+
+#### 资料
+
+```python
+wpa.getMyProfile()
+```
+
+返回 JSON：
+
+```
+{'code': 200, 'message': 'success', 'data': {'user': {'_id': '5f92f94fa94c02192e0d5c6a', 'birthday': '1999-10-08T00:00:00.000Z', 'email': 'yazawazi520', 'gender': 'f', 'name': '鸭杂袜子', 'slogan': '或许冬天我们要到厨房去', 'title': '萌新', 'verified': False, 'exp': 460, 'level': 2, 'characters': [], 'created_at': '2020-10-23T15:39:59.824Z', 'avatar': {'originalName': 'avatar.jpg', 'path': 'fe23bfa0-5e6b-4408-bac6-5b5735fac283.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'isPunched': True}}}
+```
+
+#### 签到
+
+```python
+wpa.punchIn()
+```
+
+因为我今天签到过了，明天补上。
+
+### 其他
+
+因为 PicAcg 不好做下载（其实是懒），所以写了一些东西（目前只有一个）帮助开发者对 PicAcg 进行更好的操作。
+
+#### 获取图片地址
+
+```python
+wpa.getSinglePage("https://storage1.picacomic.com", "fe23bfa0-5e6b-4408-bac6-5b5735fac283.jpg")
+
+# 第一位表示服务器地址，在 fileServer 中可见。
+# 第二位表示图片路径，在 path 中可见。
+```
+
+返回字符串：
+
+```
+https://storage1.picacomic.com/static/fe23bfa0-5e6b-4408-bac6-5b5735fac283.jpg
+```
+
+## 结语
+
+本项目的开发离不开以下开源项目：
+
+1. JavBus 代码参考：[WWILLV/iav: 可搜索javbus、btso的磁力链接和avgle的预览视频 (github.com)](https://github.com/WWILLV/iav)；
+2. PicAcg 部分：[AnkiKong/picacomic: 哔咔漫画相关api (github.com)](https://github.com/AnkiKong/picacomic) 提供了大部分的 Api 链接；使用了 [tonquer/picacg-windows: 哔咔漫画，picacomic，bika，PC客户端。 (github.com)](https://github.com/tonquer/picacg-windows)  中的最新 headers；https://www.hiczp.com/wang-luo/mo-ni-bi-ka-android-ke-hu-duan.html 提供了一些想法（GitHub 地址：[czp3009/czp-blog (github.com)](https://github.com/czp3009/czp-blog)）。
+
+如果你有更多的想法，欢迎提出 issues 或者与我联系，我的常用联系方式是：
+
+1. 你直接找我 QQ：2586651867。
