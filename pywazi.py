@@ -1,38 +1,9 @@
 """
 Program for crawling web resources.
-See Readme.md for more details.
+See Readme.md & doc.md for more details.
 
 爬取网络资源的程序。
-详情请看 Readme.md。
-
-Because of I can't use Requests for no reason, so I use Urllib.
-
-Sometimes my thinking is confusing and I don't follow PEP 8,
-so part of the code you may not be able to read,
-if you have questions you can talk to me or modify it yourself.
-
-不知为何我用不了 Requests 库，所以只能用 Urllib。
-
-有时候我的想法比较混乱，并且我不遵守 PEP 8，
-所以部分代码你可能看不懂。
-如果你有问题的话，可以找我谈谈或者自己修改一下。
-
-The current version is for highly technical users.
-being the first to engage PyWazi at the earliest point in the development cycle,
-using code that has not yet been completed and tested.
-will suffer from numerous shortcomings and low stability and efficiency.
-The open source projects used are not yet specified and the development documentation is not yet published.
-Please wait for the project to be completed before
-I will announce it again, it's just a project to occupy the pit now.
-Of course, do not rule out the possibility of deleting the project at any time.
-
-目前的版本适合高度技术性用户，
-率先使用尚未完成和测试的代码在开发周期中最早参与 PyWazi，
-将会存在大量不足之处和低稳定性和效率，
-并且还未注明使用的开源项目和公布开发文档。
-请等待项目完工之后，
-我再公布，现在就一占坑项目。
-当然，不排除随时删除项目的可能性。
+详情请看 Readme.md & doc.md。
 """
 
 import os
@@ -48,15 +19,8 @@ import urllib.request
 from bs4 import BeautifulSoup
 
 class waziRequest:
-    # I advise you not to figure out this class I wrote,
-    # because it will be very painful for you.
-    # It's enough that I know exactly what I'm writing.
-    # Thank you for your cooperation.
-    #
-    # 我劝你别搞懂我写的这个类，
-    # 这会让你感到非常痛苦的。
-    # 我清楚我写的是啥就足够了。
-    # 谢谢你的配合。
+    # Network request class.
+    # 网络请求类
     def __init__(self):
         super(waziRequest, self).__init__()
         self.isUseProxies = True
