@@ -1071,7 +1071,8 @@ class waziPicAcg:
             "gameComments": "https://picaapi.picacomic.com/games/{gameId}/comments",
             "avatar": "https://picaapi.picacomic.com/users/avatar",
             "userTitle": "https://picaapi.picacomic.com/users/{userId}/title",
-            "forgotPassword": "https://picaapi.picacomic.com/auth/forgot-password"
+            "forgotPassword": "https://picaapi.picacomic.com/auth/forgot-password",
+            "resetPassword": "https://picaapi.picacomic.com/auth/reset-password"
         }
         self.request = waziRequest()
         self.editHeaders()
@@ -1440,45 +1441,35 @@ class waziPicAcg:
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
-    # 无法使用，返回同 {'code': 400, 'error': '1015', 'message': 'invalid request', 'detail': ':('}
-    # PicAcg 解包相关源代码：
-    #   @POST("auth/forgot-password")
-    #   Call<GeneralResponse<ForgotPasswordResponse>> a(@Body ForgotPasswordBody paramForgotPasswordBody);
-    # package com.picacomic.fregata.objects.requests;
-    #
-    # public class ForgotPasswordBody {
-    #   String email;
-    #
-    #   public ForgotPasswordBody(String paramString) {
-    #     this.email = paramString;
-    #   }
-    #
-    #   public String getEmail() {
-    #     return this.email;
-    #   }
-    #
-    #   public void setEmail(String paramString) {
-    #     this.email = paramString;
-    #   }
-    #
-    #   public String toString() {
-    #     StringBuilder stringBuilder = new StringBuilder();
-    #     stringBuilder.append("ForgotPasswordBody{email='");
-    #     stringBuilder.append(this.email);
-    #     stringBuilder.append('\'');
-    #     stringBuilder.append('}');
-    #     return stringBuilder.toString();
-    #   }
-    # }
-    # def forgotPassword(self, loginName):
-    #     tempParams = self.params
-    #     tempParams["useHeaders"] = True
-    #     waziPicAcg.sign(self, self.urls["forgotPassword"], "POST")
-    #     requestParams = self.request.handleParams(tempParams, "post", self.urls["forgotPassword"], self.headers,
-    #                                               self.proxies)
-    #     requestParams["data"] = json.dumps({"email": loginName}).encode()
-    #     jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-    #     return jsons
+    # 重置密码？疑似废弃接口
+    def resetPassword(self, loginName, questionNo, answer):
+        data = {
+            "email": loginName,
+            "questionNo": int(questionNo),
+            "answer": answer
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["resetPassword"], "POST")
+        requestParams = self.request.handleParams(tempParams, "put", self.urls["resetPassword"], self.headers,
+                                                  self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # app 返回 1015 等待服务器修一下
+    def forgotPassword(self, loginName):
+        data = {
+            "email": loginName
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["forgotPassword"], "POST")
+        requestParams = self.request.handleParams(tempParams, "post", self.urls["forgotPassword"], self.headers,
+                                                  self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
 
 
 # [1]: 代码使用： https://github.com/WWILLV/iav （未注明详细的版权协议）
