@@ -1072,7 +1072,10 @@ class waziPicAcg:
             "avatar": "https://picaapi.picacomic.com/users/avatar",
             "userTitle": "https://picaapi.picacomic.com/users/{userId}/title",
             "forgotPassword": "https://picaapi.picacomic.com/auth/forgot-password",
-            "resetPassword": "https://picaapi.picacomic.com/auth/reset-password"
+            "resetPassword": "https://picaapi.picacomic.com/auth/reset-password",
+            "adjustExp": "https://picaapi.picacomic.com/utils/adjust-exp",
+            "password": "https://picaapi.picacomic.com/users/password",
+            "updateId": "https://picaapi.picacomic.com/users/update-id"
         }
         self.request = waziRequest()
         self.editHeaders()
@@ -1471,6 +1474,57 @@ class waziPicAcg:
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
+    # 估计是管理员用的
+    # 调整用户经验值
+    # wpa.adjustExp("5f92f94fa94c02192e0d5c6a", 470)
+    # userId 表示用户 ID，exp 表示经验值，不清楚是不是直接替换还是增加上去的
+    def adjustExp(self, userId, exp):
+        data = {
+            "exp": int(exp),
+            "userId": userId
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["adjustExp"], "POST")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "post", self.urls["adjustExp"], self.headers,
+                                                  self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 修改账号密码
+    # wpa.changePassword(你的旧密码, 你的新密码)
+    # 返回 JSON：
+    # {'code': 200, 'message': 'success'}
+    def changePassword(self, oldPassword, newPassword):
+        data = {
+            "old_password": oldPassword,
+            "new_password": newPassword
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["password"], "PUT")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "put", self.urls["password"], self.headers, self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 修改昵称 官方说现在不能用
+    def changeDisplayName(self, loginName, newDisplayName):
+        data = {
+            "email": loginName,
+            "name": newDisplayName
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["updateId"], "PUT")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "put", self.urls["updateId"], self.headers, self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
 
 # [1]: 代码使用： https://github.com/WWILLV/iav （未注明详细的版权协议）
 # [2]: Api 参考： https://github.com/AnkiKong/picacomic （MIT 版权）
