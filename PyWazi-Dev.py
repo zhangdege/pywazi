@@ -5,7 +5,93 @@ See Readme.md & doc.md for more details.
 爬取网络资源的程序。
 详情请看 Readme.md & doc.md。
 
-测试版 1.0.1.1 -> 1.0.2
+测试版 1.0.1.2 -> 1.0.2
+
+目前反编译出来的接口（剩余要做）：
+utils/remove-comment 删除某个用户的全部评论（？）
+POST 模式 带 auth
+{
+    "userId": userId
+}
+
+users/favourite 其实还可以带一个 s（排序）
+
+comics/leaderboard 排行榜
+GET 模式 带 auth
+tt 给 H24 D7 D30 24 小时 7 天 30 天
+ct 给 VC 就行
+
+init?platform=android 不知道是啥
+GET 模式 带 auth
+
+comics/random 随机漫画
+GET 模式 带 auth
+
+comics/knight-leaderboard 骑士榜
+GET 模式 带 auth
+
+collections 集合？不太懂
+GET 模式 带 auth
+
+banners 横幅？广告位内容？
+GET 模式 带 auth
+
+chat 聊天频道
+GET 模式 带 auth
+
+pica-apps 小程序
+GET 模式 带 auth
+
+applications?platform=android 安卓小程序？
+GET 模式 带 auth
+page 分页 从 1 数起
+
+utils/block-user 封禁用户
+POST 模式 带 auth
+{
+    "userId": userId
+}
+
+users/notifications 通知
+GET 模式 带 auth
+page 分页 从 1 数起
+
+comments/{commentId}/childrens 子评论（
+GET 模式 带 auth
+page 分页 从 1 数起
+
+init 初始化
+GET 模式
+
+eps/{epsId}/pages （分页新的请求模式？）
+GET 模式 带 auth
+epsId 分页 ID
+page 分页 从 1 数起
+
+announcements 公告
+GET 模式 带 auth
+page 分页 从 1 数起
+
+users/{userId}/dirty 不清楚是什么
+POST 模式 带 auth
+
+users/{userId}/profile 查看别人主页
+POST 模式 带 auth
+
+comments/{commentId}/like 给评论点赞
+POST 模式 带 auth
+
+comments/{commentId}/hide 隐藏评论
+POST 模式 带 auth
+
+comments/{commentId}/report 举报评论
+POST 模式 带 auth
+
+comments/{commentId}/top 置顶评论
+POST 模式 带 auth
+
+http://68.183.234.72/ http://206.189.95.169/ 不知道是什么
+init 分流 图片质量 等我看看
 """
 
 import os
@@ -1075,7 +1161,8 @@ class waziPicAcg:
             "resetPassword": "https://picaapi.picacomic.com/auth/reset-password",
             "adjustExp": "https://picaapi.picacomic.com/utils/adjust-exp",
             "password": "https://picaapi.picacomic.com/users/password",
-            "updateId": "https://picaapi.picacomic.com/users/update-id"
+            "updateId": "https://picaapi.picacomic.com/users/update-id",
+            "updateQA": "https://picaapi.picacomic.com/users/update-qa"
         }
         self.request = waziRequest()
         self.editHeaders()
@@ -1522,6 +1609,48 @@ class waziPicAcg:
         waziPicAcg.sign(self, self.urls["updateId"], "PUT")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "put", self.urls["updateId"], self.headers, self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 修改签名
+    # wpa.changeSlogan(你的新签名)
+    # 返回 JSON：
+    # {'code': 200, 'message': 'success'}
+    def changeSlogan(self, newSlogan):
+        data = {
+            "slogan": newSlogan
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["profile"], "PUT")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "put", self.urls["profile"], self.headers, self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 修改注册时的找回密码的三个问题和答案
+    # wpa.changeQA([{"q": "第一个问题", "a": "第一个答案"},
+    #               {"q": "第二个问题", "a": "第二个答案"},
+    #               {"q": "第三个问题", "a": "第三个答案"}]
+    #             )
+    # 返回 JSON：
+    # {'code': 200, 'message': 'success'}
+    def changeQA(self, qa):
+        data = {
+            "question1": qa[0]["q"],
+            "question2": qa[1]["q"],
+            "question3": qa[2]["q"],
+            "answer1": qa[0]["a"],
+            "answer2": qa[1]["a"],
+            "answer3": qa[2]["a"]
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["updateQA"], "PUT")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "put", self.urls["updateQA"], self.headers, self.proxies)
         requestParams["data"] = json.dumps(data).encode()
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
