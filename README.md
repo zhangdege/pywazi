@@ -35,7 +35,8 @@ PyWazi 是一个针对 ExHentai, JavBus, Danbooru, PicAcg 的一个数据采集�
 
 ## 计划要做的事情
 1. Danbooru 的高级 Post 搜索（可能，只在 yande.re 下测试）；
-2. PicAcg 的一些内容：
+2. ExHentai 其他显示模式的支持；
+3. PicAcg 的一些内容：
     1. 支持 PicAcg 下载；
     2. PicAcg 封面图的地址处理；
     3. 神魔推荐；
@@ -44,7 +45,8 @@ PyWazi 是一个针对 ExHentai, JavBus, Danbooru, PicAcg 的一个数据采集�
     6. 用户类：注册账号；修改密码；修改个人信息；获取通知公告；
     7. 分流类：可选择分流；
     8. 聊天室、留言板和小程式我研究研究；
-3. 英文翻译。
+4. 英文翻译；
+5. 计划使用 requests 代替 urllib3。
 
 ## 联系我
 
