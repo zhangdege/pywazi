@@ -33,6 +33,19 @@ PyWazi 是一个针对 ExHentai, JavBus, Danbooru, PicAcg 的一个数据采集�
 
 您可以随意 fork 或 clone 等本代码，随意修改，想做什么就做什么。
 
+## 计划要做的事情
+1. Danbooru 的高级 Post 搜索（可能，只在 yande.re 下测试）；
+2. PicAcg 的一些内容：
+    1. 支持 PicAcg 下载；
+    2. PicAcg 封面图的地址处理；
+    3. 神魔推荐；
+    4. 排行榜：24 小时；7 日排行；30 日排行；骑士榜；
+    5. 搜索类：支持随机的本子获取；搜索筛选；最近更新；
+    6. 用户类：注册账号；修改密码；修改个人信息；获取通知公告；
+    7. 分流类：可选择分流；
+    8. 聊天室、留言板和小程式我研究研究；
+3. 英文翻译。
+
 ## 联系我
 
 如果你有更多的想法，欢迎提出 issues 或者与我联系，我的 QQ 是：2586651867。其他社交平台不活跃，所以不公开。您可以向我提供如下内容：
@@ -51,7 +64,7 @@ PyWazi 是一个针对 ExHentai, JavBus, Danbooru, PicAcg 的一个数据采集�
 
 ## Unable to read Simplified Chinese / 无法阅读简体中文
 
-如果你无法阅读简体中文的话，你可以阅读英文版的文档。（未完成，几天内公布）
+如果你无法阅读简体中文的话，你可以阅读英文版的文档。（未完成）
 
 英文版翻译进度：
 
@@ -60,7 +73,7 @@ PyWazi 是一个针对 ExHentai, JavBus, Danbooru, PicAcg 的一个数据采集�
 
 
 
-If you can't read Simplified Chinese, you can read the English version of the document. (not finished, to be published in a few days)
+If you can't read Simplified Chinese, you can read the English version of the document. (not finished)
 
 English translation progress:
 
