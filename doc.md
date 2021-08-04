@@ -192,7 +192,7 @@ wdb.getPosts(0, "")
 
 返回格式为 JSON （取其中一例）：
 
-```
+```python
 [{
 	'id': 823891,
 	'tags': 'bikini erect_nipples swimsuits tomozero wet',
@@ -263,7 +263,7 @@ wdb.downloadPosts(0, "", "./download")
 
 返回如下内容：
 
-```
+```python
 ['./download/823893.jpg', './download/823892.jpg', './download/823891.jpg', './download/823890.png', './download/823889.png', './download/823888.png', './download/823887.png', './download/823886.png', './download/823885.png', './download/823883.png', './download/823882.png', './download/823881.png', './download/823880.png', './download/823879.png', './download/823878.png', './download/823877.png', './download/823876.png', './download/823875.png', './download/823874.png', './download/823873.png', './download/823872.png', './download/823871.png', './download/823870.png', './download/823869.png', './download/823868.png', './download/823867.png', './download/823866.png', './download/823865.png', './download/823864.png', './download/823863.png', './download/823862.png', './download/823861.png', './download/823860.png', './download/823859.png', './download/823858.png', './download/823857.png', './download/823856.png', './download/823855.png', './download/823854.png', './download/823853.png']
 ```
 
@@ -306,7 +306,7 @@ wjb.getMagnet("doks-539")
 
 返回 JSON 格式：
 
-```
+```python
 [{'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}, {'title': 'DOKS-539', 'magnet': 'magnet:?xt=urn:btih:BD68655E788DA7B8CAAE739C7D46F3B4890F3A89&dn=DOKS-539', 'size': '5.01GB', 'date': '2021-03-31'}]
 ```
 
@@ -365,7 +365,7 @@ wex.browse(0) # 页码，从 0 开始数起
 
 返回 JSON（取其中一例）：
 
-```
+```python
 [{
 		'title': '[すいかのたね (はしくれ太郎)] 放課後生徒指導2 [DL版]',
 		'href': 'https://exhentai.org/g/1973120/1c59805f78/',
@@ -565,7 +565,7 @@ wex.getTorrent("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回为 JSON：
 
-```
+```python
 [{'time': '2021-07-02 17:44', 'size': '107.0 MB', 'seeds': '7', 'peers': '0', 'total': '2810', 'link': 'https://exhentai.org/torrent/1948847/122ce9d316681251fe0ea634e0c0af8f0e491d74.torrent', 'name': '(同人CG集) [tokunocin (徳之ゆいか) 妄想少女キクリちゃん #1.zip'}]
 ```
 
@@ -585,7 +585,7 @@ wex.getInfo("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回为 JSON：
 
-```
+```python
 {'title': '[tokunocin (Tokuno Yuika)] Mousou Shoujo Kikuri-chan # 1', 'jTitle': '[tokunocin (徳之ゆいか)] 妄想少女キクリちゃん #1', 'cats': 'Artist CG', 'tags': ['group:tokunocin', 'artist:tokuno yuika', 'female:stockings', 'female:sole female', 'female:solo action', 'female:masturbation', 'variant set'], 'time': '2021-07-02 17:41', 'father': 'None', 'viewable': 'Yes', 'language': 'Japanese', 'size': '107.0 MB', 'pages': '20 pages', 'favTimes': '229 times', 'uploader': '那珂 ちゃん', 'rate': '4.58', 'cover': 'https://exhentai.org/t/0d/cc/0dcc07ddde12dd84a128ae83f9ff48375e32f768-5456884-2921-4112-png_250.jpg'}
 ```
 
@@ -601,7 +601,7 @@ wex.apiInfo("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回为 JSON：
 
-```
+```python
 {'gmetadata': [{'gid': 1948847, 'token': 'f81687b96e', 'archiver_key': '452153--5199ecd2562338cc94aa8a09db897b32011d18d0', 'title': '[tokunocin (Tokuno Yuika)] Mousou Shoujo Kikuri-chan # 1', 'title_jpn': '[tokunocin (徳之ゆいか)] 妄想少女 キクリちゃん #1', 'category': 'Artist CG', 'thumb': 'https://exhentai.org/t/0d/cc/0dcc07ddde12dd84a128ae83f9ff48375e32f768-5456884-2921-4112-png_l.jpg', 'uploader': '那珂ちゃん', 'posted': '1625247675', 'filecount': '20', 'filesize': 112188093, 'expunged': False, 'rating': '4.58', 'torrentcount': '1', 'torrents': [{'hash': '122ce9d316681251fe0ea634e0c0af8f0e491d74', 'added': '1625247855', 'name': '(同人CG集) [tokunocin (徳之ゆいか) 妄想少女キクリちゃん #1.zip', 'tsize': '17487', 'fsize': '112192764'}], 'tags': ['group:tokunocin', 'artist:tokuno yuika', 'female:masturbation', 'female:sole female', 'female:solo action', 'female:stockings', 'variant set']}]}
 ```
 
@@ -617,7 +617,7 @@ wex.getComments("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回为 JSON：
 
-```
+```python
 [{'time': '02 July 2021, 17:41', 'uploader': 'https://exhentai.org/uploader/%E9%82%A3%E7%8F%82%E3%81%A1%E3%82%83%E3%82%93', 'uploaderName': '那珂ちゃん', 'scores': 'None / 不适用', 'htmlComments': '\n https://fantia.jp/posts/615177\n <br/>\n <br/>\n <a href="https://exhentai.org/s/0dcc07ddde/1948847-1">\n  001~010 文字あり\n </a>\n <br/>\n <a href="https://exhentai.org/s/0e34105f9a/1948847-11">\n  011~020 文字なし\n </a>\n\n'}, {'time': '30 July 2021, 04:56', 'uploader': 'https://exhentai.org/uploader/[打码]', 'uploaderName': '[打码]', 'scores': '+76', 'htmlComments': '\n https://ehwiki.org/wiki/japanese\n <br/>\n <br/>\n Default language flag;\n <strong>\n  do NOT use this tag\n </strong>\n outside of legitimate dual-language galleries and translations to Japanese.\n\n'}]
 ```
 
@@ -651,7 +651,7 @@ wex.getLargeThumbnails("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回 JSON （举一例说明）：
 
-```
+```python
 [{'url': 'https://exhentai.org/t/0d/cc/0dcc07ddde12dd84a128ae83f9ff48375e32f768-5456884-2921-4112-png_l.jpg', 'style': 'height:302px', 'alt': '01', 'title': 'Page 1: cien_2102_01_full.png', 'text': '01'}, ...]
 ```
 
@@ -667,7 +667,7 @@ wex.getNormalThumbnails("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回 JSON （举一例说明）：
 
-```
+```python
 [{'style': 'height:161px', 'divMargin': '1px auto 0', 'divWidth': '100px', 'divHeight': '141px', 'url': 'https://exhentai.org/m/001948/1948847-00.jpg', 'transparent': '-0px 0 no-repeat', 'imgAlt': '01', 'imgTitle': 'Page 1: cien_2102_01_full.png', 'imgWidth': '100px', 'imgHeight': '140px', 'imgMargin': '-1px 0 0 -1px'}, ...]
 ```
 
@@ -688,13 +688,13 @@ wex.getNormalImages("https://exhentai.org/g/1948847/f81687b96e/", "get", {"path"
 
 get 返回：
 
-```
+```python
 ['https://psnnstn.svbhzynmthvg.hath.network:6643/h/9a46b72d4e41e2cb71904e3f47a3a225041614f6-702136-2400-3379-jpg/keystamp=1627754700-3893ea4f9c;fileindex=94546547;xres=2400/cien_2102_01_full.jpg', ...]
 ```
 
 download 返回：
 
-```
+```python
 ['./download\\[tokunocin (徳之ゆいか)] 妄想少女キクリちゃん #1\\cien_2102_01_full.jpg', ...]
 ```
 
@@ -711,7 +711,7 @@ wex.getMPVImages("https://exhentai.org/g/1948847/f81687b96e/", "get", {"path": "
 
 get 返回：
 
-```
+```python
 [{'name': 'cien_2102_01_full.png', 'url': 'https://vzwiuar.bgjtsezaekpi.hath.network:9880/h/219a879c79dddf63c230e02408ccebceebd9cccb-283462-1280-1802-jpg/keystamp=1627755900-c26b737547;fileindex=94546547;xres=1280/cien_2102_01_full.jpg'}, ...]
 ```
 
@@ -719,7 +719,7 @@ get 返回：
 
 download 返回：
 
-```
+```python
 ['./download\\[tokunocin (徳之ゆいか)] 妄想少女キクリちゃん #1\\cien_2102_01_full.jpg', ...]
 ```
 
@@ -737,7 +737,7 @@ wex.getArchivesHATH("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回 JSON （取一例）：
 
-```
+```python
 [{'sample': '780x', 'size': '1.42 MB', 'cost': 'Free', 'code': '780', 'url': 'https://exhentai.org/archiver.php?gid=1948847&token=f81687b96e&or=452154-1c41df26535532bfc35cff7874319017afed3418'}, ...]
 ```
 
@@ -763,7 +763,7 @@ wex.getArchives("https://exhentai.org/g/1948847/f81687b96e/")
 
 返回 JSON （取一例）：
 
-```
+```python
 [{'type': 'original', 'link': 'https://plprhexcngkbxoopaqlx.hath.network/archive/1948847/1d0756978bba0f6166cc5eafa1b05cc33257a77d/cxltzmu9ovu/2?start=1'}, {'type': 'resample', 'link': 'https://plprhexcngkbxoopaqlx.hath.network/archive/1948847/1d0756978bba0f6166cc5eafa1b05cc33257a77d/cxltzmu9ovu/3?start=1'}]
 ```
 
@@ -821,7 +821,7 @@ wpa.getCategories()
 
 返回 （JSON）：
 
-```
+```python
 {
 	'code': 200,
 	'message': 'success',
@@ -983,9 +983,8 @@ wpa.getKeywords()
 
 返回：
 
-```
-{'code': 200, 'message': 'success', 'data': {'keywords': ['乳汁', '短髮', '全彩', '自慰', '吞精', '橫切面', '無修正', '
-短篇合集', '校園', '人外娘', '開大車']}}
+```python
+{'code': 200, 'message': 'success', 'data': {'keywords': ['乳汁', '短髮', '全彩', '自慰', '吞精', '橫切面', '無修正', '短篇合集', '校園', '人外娘', '開大車']}}
 ```
 
 ### 搜索
@@ -1010,7 +1009,7 @@ wpa.getComics("1", "足の恋", "全彩", "ua")
 
 返回 JSON：
 
-```
+```python
 {
 	'code': 200,
 	'message': 'success',
@@ -1079,7 +1078,7 @@ wpa.getComic("60f5aab6e239c4708507c5d9")
 
 返回 JSON：
 
-```
+```python
 {'code': 200, 'message': 'success', 'data': {'comic': {'_id': '60f5aab6e239c4708507c5d9', '_creator': {'_id': '58b2fe52288c3778fcbaba4d', 'gender': 'f', 'name': 'Selestial', 'verified': False, 'exp': 4586, 'level': 7, 'characters': ['knight'], 'role': 'knight', 'title': '萌新', 'avatar': {'originalName': 'avatar.jpg', 'path': 'f959bc38-94c0-4793-bc02-b1465d74f0bc.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'slogan': '......', 'character': 'https://pica-web.wakamoment.tk/images/halloween_f.png'}, 'title': 'ホクロ流星群せかんど [中国翻訳] [DL版]', 'description': '早该好好学学了\n（05 后别看05后别看05后别看）', 'thumb': {'originalName': 'QQ图片20210718224515.png', 'path': 'tobeimg/Gxkeem7A4h_VvYKYnIJbQx3ZCAcWFNj38-CFbeOfhZ4/fill/300/400/sm/0/aHR0cHM6Ly9zdG9yYWdlMS5waWNhY29taWMuY29tL3N0YXRpYy9jMjJjODVjNi0yYzUzLTQxMWQtYmIwNi1jZjg0NzBmZGVmZmEucG5n.png', 'fileServer': 'https://storage1.picacomic.com'}, 'author': '書肆マガジンひとり (ホクロ流 星群)', 'chineseTeam': '观星能治颈椎病个人渣翻', 'categories': ['偽娘哲學', '全彩', '短篇'], 'tags': ['偽娘', '口交', ' 制服', '雌墜', '女裝'], 'pagesCount': 30, 'epsCount': 1, 'finished': True, 'updated_at': '2021-07-19T16:39:18.121Z', 'created_at': '2021-07-18T15:12:14.015Z', 'allowDownload': True, 'allowComment': True, 'totalLikes': 438, 'totalViews': 51574, 'viewsCount': 51574, 'likesCount': 438, 'isFavourite': False, 'isLiked': False, 'commentsCount': 97}}}
 ```
 
@@ -1095,7 +1094,7 @@ wpa.getComicEps("60f5aab6e239c4708507c5d9", "1")
 
 返回 JSON：
 
-```
+```python
 {'code': 200, 'message': 'success', 'data': {'eps': {'docs': [{'_id': '60f5aab6e239c4708507c5da', 'title': '第1話', 'order': 1, 'updated_at': '2021-07-18T15:17:47.711Z', 'id': '60f5aab6e239c4708507c5da'}], 'total': 1, 'limit': 40, 'page': 1, 'pages': 1}}}
 ```
 
@@ -1112,7 +1111,7 @@ wpa.getComicPages("60f5aab6e239c4708507c5d9", "1", "1")
 
 返回 JSON：
 
-```
+```python
 {
 	'code': 200,
 	'message': 'success',
@@ -1152,7 +1151,7 @@ wpa.getComicRecommend("60f5aab6e239c4708507c5d9")
 
 返回 JSON：
 
-```
+```python
 {'code': 200, 'message': 'success', 'data': {'comics': []}}
 ```
 
@@ -1168,7 +1167,7 @@ wpa.likeOrUnLikeComic("60f5aab6e239c4708507c5d9")
 
 返回 JSON：
 
-```
+```python
 {'code': 200, 'message': 'success'}
 ```
 
@@ -1184,7 +1183,7 @@ wpa.favOrUnFavComic("60f5aab6e239c4708507c5d9")
 
 返回 JSON：
 
-```
+```python
 {'code': 200, 'message': 'success'}
 ```
 
@@ -1203,7 +1202,7 @@ wpa.getComicComments("60f5aab6e239c4708507c5d9", "1")
 
 而且这个 JSON 我删掉了好多评论，可能误删了其他内容。
 
-```
+```python
 {'code': 200, 'message': 'success', 'data': {'comments': {'docs': [{'_id': '61053f8efde353772059fbac', 'content': '有洗
 脑的味儿了', '_user': {'_id': '58c2f6da3f5ca24bed33a10e', 'gender': 'm', 'name': '[打码]', 'verified': False, 'exp': 1405, 'level': 4, 'characters': [], 'role': 'member', 'avatar': {'originalName': 'avatar.jpg', 'path': 'c8bf310f-999b-4d57-81f0-673e0dec67f3.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'title': '[打码]', 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_m.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-31T12:18:22.870Z', 'id': '61053f8efde353772059fbac', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}, {'_id': '6102101969279b6daec6d2e5', 'content': '小朋友们 快跑啊——\n(未成年请在家长陪同下观看)', '_user': {'_id': '5b93df6fa45b9d65304f4ab7', 'gender': 'bot', 'name': '[打码]', 'title': '[打码]', 'verified': False, 'exp': 3570, 'level': 6, 'characters': [], 'role': 'member', 'avatar': {'fileServer': 'https://storage1.picacomic.com', 'path': 'ae492e1b-cc43-4b10-8a84-30574759cbf2.jpg', 'originalName': 'avatar.jpg'}, 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_bot.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-29T02:19:05.590Z', 'id': '6102101969279b6daec6d2e5', 'likesCount': 4, 'commentsCount': 0, 'isLiked': False}, {'_id': '61010b14e65322b6796ff730', 'content': 'hso', '_user': {'_id': '5bf0e5dc0fdd3c38c9517afa', 'gender': 'm', 'name': '[打码]', 'title': '[打码]', 'verified': False, 'exp': 210, 'level': 2, 'characters': [], 'role': 'member', 'avatar': {'fileServer': 'https://storage1.picacomic.com', 'path': '6bc97079-8404-4e91-96f3-ae2c7914e85d.jpg', 'originalName': 'avatar.jpg'}, 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_m.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-28T07:45:24.006Z', 'id': '61010b14e65322b6796ff730', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}, {'_id': '60fef9011ba3a4b65a7ba877', 'content': '可以', '_user': {'_id': '584ecc8b0554fd247dd63194', 'gender': 'm', 'name': '[打码]', 'verified': False, 'exp': 825, 'level': 3, 'characters': [], 'role': 'member', 'avatar': {'originalName': 'avatar.jpg', 'path': '7e53d9e5-7dd8-4a1b-aed4-23757c17f7d5.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'title': '[打码]', 'slogan': '[打码]', 'character': 'https://pica-web.wakamoment.tk/images/halloween_m.png'}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-26T18:03:45.405Z', 'id': '60fef9011ba3a4b65a7ba877', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}, {'_id': '60fe2dc8273afa59289d02b6', 'content': '[打码]', '_user': {'_id': '5b624f89baa50311bef929cf', 'gender': 'm', 'name': '[打码]', 'title': '[打码]', 'verified': False, 'exp': 390, 'level': 2, 'characters': [], 'role': 'member', 'avatar': {'originalName': 'avatar.jpg', 'path': '69009713-1b8f-4a75-b2d3-3351a801adc3.jpg', 'fileServer': 'https://storage1.picacomic.com'}}, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-26T03:36:40.134Z', 'id': '60fe2dc8273afa59289d02b6', 'likesCount': 11, 'commentsCount': 0, 'isLiked': False},, '_comic': '60f5aab6e239c4708507c5d9', 'isTop': False, 'hide': False, 'created_at': '2021-07-22T07:04:32.970Z', 'id': '60f91880281d48c9b80eac72', 'likesCount': 0, 'commentsCount': 0, 'isLiked': False}], 'total': 70, 'limit': 20, 'page': '1', 'pages': 4}, 'topComments': []}}
 ```
@@ -1233,7 +1232,7 @@ wpa.getGames(1)
 
 返回 JSON：
 
-```
+```python
 {
 	'code': 200,
 	'message': 'success',
@@ -1287,7 +1286,7 @@ wpa.getGameInfo("5ded08947cd2ce4ed0f5e101")
 
 返回 JSON：
 
-```
+```python
 {'code': 200, 'message': 'success', 'data': {'game': {'_id': '5ded08947cd2ce4ed0f5e101', 'title': '真愛の百合は赤く染ま
 る', 'description': '----------團長特別警告!!----------\n\n純愛大作，厄夜良心推薦。\n親自測試，絕對無雷!\n(๑•̀ᄇ•́)و ✧\n\n物語的主人公「真奈美」最近剛搬到了一個新的小鎮裡，而身為蕾絲的她暗地裡對同班同學的「愛實」抱有著愛意。\n\n一直嘗試隱藏的這份感情卻被對方輕易看穿，而真奈美也從她那聽到了令人驚愕的發言——\n\n「我其實也……喜歡女孩子」\n\n心意相通的兩人很快便確立了關系，然而這份關系卻隨著時間的流逝漸漸變質得不可名狀。「MANAMI」到底能滿足「MANAMI」到什麼程度呢。不久，這份異常的緣分便將她們以外的人們也卷入了事件的漩渦當中，而本應純情的物語也開始大幅度地產生扭曲……\n\n請用zarchiver解壓，用krkr2玩耍。', 'version': '1.0.0', 'icon': {'originalName': '2019-12-09 23.29.05.jpg', 'path': '260034ca-77b3-458a-99c1-1eb11b3a05a4.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'publisher': 'バグシステム', 'ios': True, 'iosLinks': ['https://game.eroge.xyz/hhh.php?id=106'], 'android': True, 'androidLinks': ['https://game.eroge.xyz/hhh.php?id=106'], 'adult': True, 'suggest': False, 'downloadsCount': 0, 'screenshots': [{'originalName': '2019-12-09 23.29.10.jpg', 'path': 'ad636f7b-cbbd-474a-81f4-ce1509eda319.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.14.jpg', 'path': '11ccbab5-8673-4be6-b1bd-f8f9c5687fa9.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.18.jpg', 'path': '36d49e43-36b6-4075-9447-1d7ebe460f6e.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.22.jpg', 'path': '142140b8-b5bf-47d7-bc0e-4648c79a9290.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.25.jpg', 'path': '8e0d66c7-daf9-4dc6-8479-7492bd2fddfd.jpg', 'fileServer': 'https://storage1.picacomic.com'}, {'originalName': '2019-12-09 23.29.29.jpg', 'path': '33eb34ae-e21e-4c4d-a131-bc4bc14fadb0.jpg', 'fileServer': 'https://storage1.picacomic.com'}], 'androidSize': 632.23, 'iosSize': 632.23, 'updated_at': '2020-06-03T14:27:27.042Z', 'created_at': '2019-12-08T14:28:36.369Z', 'likesCount': 8870, 'isLiked': False, 'commentsCount': 1291}}}
 ```
@@ -1338,7 +1337,7 @@ wpa.getMyComments("1")
 
 因为我没评论，返回的 JSON 是空的：
 
-```
+```python
 {'code': 200, 'message': 'success', 'data': {'comments': {'docs': [], 'total': 0, 'limit': 20, 'page': '1', 'pages': 1}}}
 ```
 
@@ -1352,7 +1351,7 @@ wpa.getMyFavourites("1")
 
 返回 JSON：
 
-```
+```python
 {
 	'code': 200,
 	'message': 'success',
@@ -1408,7 +1407,7 @@ wpa.getMyProfile()
 
 返回 JSON：
 
-```
+```python
 {'code': 200, 'message': 'success', 'data': {'user': {'_id': '5f92f94fa94c02192e0d5c6a', 'birthday': '1999-10-08T00:00:00.000Z', 'email': 'yazawazi520', 'gender': 'f', 'name': '鸭杂袜子', 'slogan': '或许冬天我们要到厨房去', 'title': '萌新', 'verified': False, 'exp': 460, 'level': 2, 'characters': [], 'created_at': '2020-10-23T15:39:59.824Z', 'avatar': {'originalName': 'avatar.jpg', 'path': 'fe23bfa0-5e6b-4408-bac6-5b5735fac283.jpg', 'fileServer': 'https://storage1.picacomic.com'}, 'isPunched': True}}}
 ```
 
@@ -1418,7 +1417,11 @@ wpa.getMyProfile()
 wpa.punchIn()
 ```
 
-因为我今天签到过了，明天补上。
+返回 JSON：
+```python
+{'code': 200, 'message': 'success', 'data': {'res': {'status': 'ok', 'punchInLastDay': '2021-08-04'}}}
+
+```
 
 ### 其他
 
