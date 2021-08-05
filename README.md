@@ -8,6 +8,8 @@ PyWazi 是一个针对 ExHentai, JavBus, Danbooru, PicAcg 的一个数据采集�
 
 本模块完全开放源代码，仅供大家学习参考使用，出了事跟我没啥关系（逃
 
+本人临时有事，暂停维护 PyWazi 一个月。
+
 ## 安装
 
 如果你是 Windows 用户请前往 Python 官网下载 Python 3 代的安装包或通过 Microsoft Store 下载 Python 3 代并 Git 或 Download ZIP 本项目。
