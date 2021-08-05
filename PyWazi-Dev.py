@@ -5,7 +5,7 @@ See Readme.md & doc.md for more details.
 爬取网络资源的程序。
 详情请看 Readme.md & doc.md。
 
-测试版 1.0.1.2 -> 1.0.2
+测试版 1.0.1.3 -> 1.0.2
 
 目前反编译出来的接口（剩余要做）：
 utils/remove-comment 删除某个用户的全部评论（？）
@@ -1162,7 +1162,11 @@ class waziPicAcg:
             "adjustExp": "https://picaapi.picacomic.com/utils/adjust-exp",
             "password": "https://picaapi.picacomic.com/users/password",
             "updateId": "https://picaapi.picacomic.com/users/update-id",
-            "updateQA": "https://picaapi.picacomic.com/users/update-qa"
+            "updateQA": "https://picaapi.picacomic.com/users/update-qa",
+            "removeComment": "https://picaapi.picacomic.com/utils/remove-comment",
+            "leaderBoard": "https://picaapi.picacomic.com/comics/leaderboard",
+            "knight": "https://picaapi.picacomic.com/comics/knight-leaderboard",
+            "randomComic": "https://picaapi.picacomic.com/comics/random"
         }
         self.request = waziRequest()
         self.editHeaders()
@@ -1302,10 +1306,12 @@ class waziPicAcg:
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
-    def getMyFavourites(self, page):
+    # page 分页 从 1 数起
+    # s 排序
+    def getMyFavourites(self, page, s):
         tempParams = self.params
         tempParams["useHeaders"] = True
-        newUrl = self.urls["myFavourites"] + "&page=" + str(page)
+        newUrl = self.urls["myFavourites"] + "?page=" + str(page) + "&s=" + s
         waziPicAcg.sign(self, newUrl, "GET")
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
@@ -1652,6 +1658,76 @@ class waziPicAcg:
         self.headers["authorization"] = self.token
         requestParams = self.request.handleParams(tempParams, "put", self.urls["updateQA"], self.headers, self.proxies)
         requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 删除某个用户的评论
+    # 可能是管理员用的 也可能是废弃的 返回 1007
+    def removeComment(self, userId):
+        data = {
+            "userId": userId
+        }
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["removeComment"], "POST")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "post", self.urls["removeComment"], self.headers,
+                                                  self.proxies)
+        requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 天排行榜
+    def getH24LeaderBoard(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["leaderBoard"] + "?tt=H24&ct=VC"
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 周排行榜
+    def getD7LeaderBoard(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["leaderBoard"] + "?tt=D7&ct=VC"
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 月排行榜
+    def getD30LeaderBoard(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        newUrl = self.urls["leaderBoard"] + "?tt=D30&ct=VC"
+        waziPicAcg.sign(self, newUrl, "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 骑士榜
+    def knightLeaderBoard(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["knight"], "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", self.urls["knight"], self.headers, self.proxies)
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    # 随机漫画
+    def getRandomComics(self):
+        tempParams = self.params
+        tempParams["useHeaders"] = True
+        waziPicAcg.sign(self, self.urls["randomComic"], "GET")
+        self.headers["authorization"] = self.token
+        requestParams = self.request.handleParams(tempParams, "get", self.urls["randomComic"], self.headers,
+                                                  self.proxies)
         jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
         return jsons
 
