@@ -1166,7 +1166,9 @@ class waziPicAcg:
             "removeComment": "https://picaapi.picacomic.com/utils/remove-comment",
             "leaderBoard": "https://picaapi.picacomic.com/comics/leaderboard",
             "knight": "https://picaapi.picacomic.com/comics/knight-leaderboard",
-            "randomComic": "https://picaapi.picacomic.com/comics/random"
+            "randomComic": "https://picaapi.picacomic.com/comics/random",
+            "collections": "https://picaapi.picacomic.com/collections",
+            "banners": "https://picaapi.picacomic.com/banners"
         }
         self.request = waziRequest()
         self.editHeaders()
@@ -1186,247 +1188,121 @@ class waziPicAcg:
         self.headers["signature"] = sig[0]
         self.headers["time"] = str(sig[1])
 
-    def login(self, username, password):
+    def up(self, url, needAuth, data, method):
         tempParams = self.params
         tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["login"], "POST")
+        waziPicAcg.sign(self, url, method)
+        if needAuth:
+            self.headers["authorization"] = self.token
+        else:
+            self.headers["authorization"] = ""
+        requestParams = self.request.handleParams(tempParams, method.lower(), url, self.headers, self.proxies)
+        if method.lower() != "get":
+            requestParams["data"] = json.dumps(data).encode()
+        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
+        return jsons
+
+    def login(self, username, password):
         body = {
             "email": username,
             "password": password
         }
-        requestParams = self.request.handleParams(tempParams, "post", self.urls["login"], self.headers, self.proxies)
-        requestParams["data"] = json.dumps(body).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        self.token = jsons["data"]["token"]
-        return self.token
+        return waziPicAcg.up(self, self.urls["login"], False, body, "POST")["data"]["token"]
 
     def getCategories(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["categories"], "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", self.urls["categories"], self.headers,
-                                                  self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["categories"], True, None, "GET")
 
     def getComics(self, page, c, t, s):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comics"] + "?page=" + str(page) + "&c=" + urllib.parse.quote(c)
         newUrl += "&t=" + urllib.parse.quote(t) + "&s=" + s
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def search(self, page, keyword):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["search"] + "?page=" + str(page) + "&q=" + urllib.parse.quote(keyword)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def getComic(self, comicId):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comicId"].replace("{comicId}", comicId)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def getComicEps(self, comicId, page):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comicEps"].replace("{comicId}", comicId) + "?page=" + str(page)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def advancedSearch(self, categories, keyword, sort, page):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["advSearch"] + "?page=" + str(page)
         body = {
             "categories": categories,
             "keyword": keyword,
             "sort": sort
         }
-        waziPicAcg.sign(self, newUrl, "POST")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "post", newUrl, self.headers, self.proxies)
-        requestParams["data"] = json.dumps(body).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, body, "POST")
 
     def getComicPages(self, comicId, eps, page):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comicPages"].replace("{comicId}", comicId).replace("{order}", eps) + "?page=" + str(page)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def getComicRecommend(self, comicId):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comicRecommend"].replace("{comicId}", comicId)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def getKeywords(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["keywords"], "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", self.urls["keywords"], self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["keywords"], True, None, "GET")
 
     def getMyComments(self, page):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["myComments"] + "?page=" + str(page)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     # page 分页 从 1 数起
     # s 排序
     def getMyFavourites(self, page, s):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["myFavourites"] + "?page=" + str(page) + "&s=" + s
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def getMyProfile(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["profile"], "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", self.urls["profile"], self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["profile"], True, None, "GET")
 
     def getGames(self, page):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["games"] + "?page=" + str(page)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def getGameInfo(self, gameId):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["games"] + "/" + str(gameId)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def likeOrUnLikeGame(self, gameId):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["gameLike"].replace("{gameId}", gameId)
-        waziPicAcg.sign(self, newUrl, "POST")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        requestParams["data"] = None
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "POST")
 
     def favOrUnFavComic(self, comicId):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comicFavourite"].replace("{comicId}", comicId)
-        waziPicAcg.sign(self, newUrl, "POST")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        requestParams["data"] = None
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "POST")
 
     def likeOrUnLikeComic(self, comicId):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comicLike"].replace("{comicId}", comicId)
-        waziPicAcg.sign(self, newUrl, "POST")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        requestParams["data"] = None
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "POST")
 
     def getGameComments(self, gameId, page):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["gameComments"].replace("{gameId}", gameId) + "?page=" + str(page)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def postGameComment(self, gameId, content):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        url = self.urls["gameComments"].replace("{gameId}", gameId)
+        newUrl = self.urls["gameComments"].replace("{gameId}", gameId)
         body = {
             "content": content
         }
-        self.headers["authorization"] = self.token
-        waziPicAcg.sign(self, url, "POST")
-        requestParams = self.request.handleParams(tempParams, "post", url, self.headers, self.proxies)
-        requestParams["data"] = json.dumps(body).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, body, "POST")
 
     def getComicComments(self, comicId, page):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["comicComments"].replace("{comicId}", comicId) + "?page=" + str(page)
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     def postComicComment(self, comicId, content):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        url = self.urls["comicComments"].replace("{comicId}", comicId)
+        newUrl = self.urls["comicComments"].replace("{comicId}", comicId)
         body = {
             "content": content
         }
-        self.headers["authorization"] = self.token
-        waziPicAcg.sign(self, url, "POST")
-        requestParams = self.request.handleParams(tempParams, "post", url, self.headers, self.proxies)
-        requestParams["data"] = json.dumps(body).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, body, "POST")
 
     def getSinglePage(self, fileServer, path):
         self.empty = ""
@@ -1436,14 +1312,7 @@ class waziPicAcg:
             return {"url": os.path.join(fileServer, "/static/", path), "sign": False}
 
     def punchIn(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["punchIn"], "POST")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "post", self.urls["punchIn"], self.headers, self.proxies)
-        requestParams["data"] = None
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.toPost(self, self.urls["punchIn"], True, None)
 
     # 测试版新增内容
     # 功能：PicAcg - 注册一个账号
@@ -1479,13 +1348,7 @@ class waziPicAcg:
             "question2": qa[1]["question"],
             "question3": qa[2]["question"]
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["register"], "POST")
-        requestParams = self.request.handleParams(tempParams, "post", self.urls["register"], self.headers, self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["register"], False, data, "POST")
 
     # 测试版新增内容
     # 功能：PicAcg - 上传 / 修改一个头像
@@ -1496,7 +1359,6 @@ class waziPicAcg:
     # 成功返回 JSON：
     # {'code': 200, 'message': 'success'}
     # 感谢 https://github.com/tonquer/picacg-windows/blob/main/src/server/req.py 中提供的参数
-
     def uploadAvatar(self, params):
         if params["type"] == "base64":
             upload = "data:image/" + params["format"] + ";base64," + params["data"]
@@ -1505,14 +1367,10 @@ class waziPicAcg:
             with open(params["path"], "rb") as f:
                 data = base64.b64encode(f.read()).decode("utf-8")
             upload = "data:image/" + fileFormat + ";base64," + data
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["avatar"], "PUT")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "put", self.urls["avatar"], self.headers, self.proxies)
-        requestParams["data"] = json.dumps({"avatar": upload}).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        data = {
+            "avatar": upload
+        }
+        return waziPicAcg.up(self, self.urls["avatar"], True, data, "PUT")
 
     # 测试版新增内容
     # 功能：PicAcg - 修改头衔
@@ -1527,15 +1385,11 @@ class waziPicAcg:
     # 感谢 https://github.com/tonquer/picacg-windows/blob/main/src/server/req.py 中提供的参数
 
     def setTitle(self, userId, title):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["userTitle"].replace("{userId}", userId)
-        waziPicAcg.sign(self, newUrl, "PUT")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "put", newUrl, self.headers, self.proxies)
-        requestParams["data"] = json.dumps({"title": title}).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        data = {
+            "title": title
+        }
+        return waziPicAcg.up(self, newUrl, True, data, "PUT")
 
     # 重置密码？疑似废弃接口
     def resetPassword(self, loginName, questionNo, answer):
@@ -1544,28 +1398,14 @@ class waziPicAcg:
             "questionNo": int(questionNo),
             "answer": answer
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["resetPassword"], "POST")
-        requestParams = self.request.handleParams(tempParams, "put", self.urls["resetPassword"], self.headers,
-                                                  self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["resetPassword"], False, data, "POST")
 
     # app 返回 1015 等待服务器修一下
     def forgotPassword(self, loginName):
         data = {
             "email": loginName
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["forgotPassword"], "POST")
-        requestParams = self.request.handleParams(tempParams, "post", self.urls["forgotPassword"], self.headers,
-                                                  self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["forgotPassword"], False, data, "POST")
 
     # 估计是管理员用的
     # 调整用户经验值
@@ -1576,15 +1416,7 @@ class waziPicAcg:
             "exp": int(exp),
             "userId": userId
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["adjustExp"], "POST")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "post", self.urls["adjustExp"], self.headers,
-                                                  self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["adjustExp"], True, data, "POST")
 
     # 修改账号密码
     # wpa.changePassword(你的旧密码, 你的新密码)
@@ -1595,14 +1427,7 @@ class waziPicAcg:
             "old_password": oldPassword,
             "new_password": newPassword
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["password"], "PUT")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "put", self.urls["password"], self.headers, self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["password"], True, data, "PUT")
 
     # 修改昵称 官方说现在不能用
     def changeDisplayName(self, loginName, newDisplayName):
@@ -1610,14 +1435,7 @@ class waziPicAcg:
             "email": loginName,
             "name": newDisplayName
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["updateId"], "PUT")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "put", self.urls["updateId"], self.headers, self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["updateId"], True, data, "PUT")
 
     # 修改签名
     # wpa.changeSlogan(你的新签名)
@@ -1627,14 +1445,7 @@ class waziPicAcg:
         data = {
             "slogan": newSlogan
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["profile"], "PUT")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "put", self.urls["profile"], self.headers, self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["profile"], True, data, "PUT")
 
     # 修改注册时的找回密码的三个问题和答案
     # wpa.changeQA([{"q": "第一个问题", "a": "第一个答案"},
@@ -1652,14 +1463,7 @@ class waziPicAcg:
             "answer2": qa[1]["a"],
             "answer3": qa[2]["a"]
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["updateQA"], "PUT")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "put", self.urls["updateQA"], self.headers, self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["updateQA"], True, data, "PUT")
 
     # 删除某个用户的评论
     # 可能是管理员用的 也可能是废弃的 返回 1007
@@ -1667,69 +1471,38 @@ class waziPicAcg:
         data = {
             "userId": userId
         }
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["removeComment"], "POST")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "post", self.urls["removeComment"], self.headers,
-                                                  self.proxies)
-        requestParams["data"] = json.dumps(data).encode()
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["removeComment"], True, data, "POST")
 
     # 天排行榜
     def getH24LeaderBoard(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["leaderBoard"] + "?tt=H24&ct=VC"
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     # 周排行榜
     def getD7LeaderBoard(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["leaderBoard"] + "?tt=D7&ct=VC"
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     # 月排行榜
     def getD30LeaderBoard(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
         newUrl = self.urls["leaderBoard"] + "?tt=D30&ct=VC"
-        waziPicAcg.sign(self, newUrl, "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", newUrl, self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, newUrl, True, None, "GET")
 
     # 骑士榜
     def knightLeaderBoard(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["knight"], "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", self.urls["knight"], self.headers, self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["knight"], True, None, "GET")
 
     # 随机漫画
     def getRandomComics(self):
-        tempParams = self.params
-        tempParams["useHeaders"] = True
-        waziPicAcg.sign(self, self.urls["randomComic"], "GET")
-        self.headers["authorization"] = self.token
-        requestParams = self.request.handleParams(tempParams, "get", self.urls["randomComic"], self.headers,
-                                                  self.proxies)
-        jsons = json.loads(self.request.do(requestParams).data.decode("utf-8"))
-        return jsons
+        return waziPicAcg.up(self, self.urls["randomComic"], True, None, "GET")
+
+    # 神魔推荐
+    def getCollections(self):
+        return waziPicAcg.up(self, self.urls["collections"], True, None, "GET")
+
+    # 首页横幅内容
+    def getBanners(self):
+        return waziPicAcg.up(self, self.urls["banners"], True, None, "GET")
 
 # [1]: 代码使用： https://github.com/WWILLV/iav （未注明详细的版权协议）
 # [2]: Api 参考： https://github.com/AnkiKong/picacomic （MIT 版权）
