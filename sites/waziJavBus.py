@@ -66,9 +66,9 @@ class waziJavBus:
             "uc": uc
         }
         if self.useDomain:
-            return self.URL.getFullURL(self.apiUrl, params)
+            return self.URL.getFullURL(urllib.parse.urljoin(self.apiUrl, "ajax/uncledatoolsbyajax.php"), params)
         else:
-            return self.URL.getFullURL(self.url, params)
+            return self.URL.getFullURL(urllib.parse.urljoin(self.url, "ajax/uncledatoolsbyajax.php"), params)
 
     def getMagnet(self, avId):
         ajaxUrl = waziJavBus.getAjax(self, avId)
