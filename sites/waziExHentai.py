@@ -157,7 +157,7 @@ class waziExHentai:
                 "cat": i.find(class_ = "cn").get_text(),
                 "cover": cover,
                 "uploader": i.find_all("a", attrs = {"href": re.compile("uploader")})[0].get_text(),
-                "uploaderURL": i.tempUrl.find_all("a", attrs = {"href": re.compile("uploader")})[0].attrs["href"],
+                "uploaderURL": i.find_all("a", attrs = {"href": re.compile("uploader")})[0].attrs["href"],
                 "time": i.find_all("div", attrs = {"onclick": re.compile("popUp")})[0].get_text(),
                 "hasTorrents": self.check.returnHasTorrents(i.find_all(class_ = "gldown")[0].find("img")),
                 "rating": ratingNum,
@@ -191,7 +191,7 @@ class waziExHentai:
                 "cover": i.find("img").attrs["src"],
                 "uploader": "Uploader information is not available in thumbnail mode. / 缩略模式下无法获取上传者信息。",
                 "uploaderURL": "Uploader information is not available in thumbnail mode. / 缩略模式下无法获取上传者信息。",
-                "time": i.find(class_ = "glnew").get_text(),
+                "time": i.find_all("div", attrs = {"onclick": re.compile("popUp")})[0].get_text(),
                 "rating": ratingNum,
                 "pages": int(i.find(class_ = "gl5t").find_all("div")[5].get_text().split(" ")[0]),
                 "others": {
