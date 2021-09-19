@@ -44,7 +44,7 @@
 
 Python 3 代应该都可以吧（
 
-需要的是 beautifulsoup4 lxml urllib4 应该就够了
+需要的是 beautifulsoup4 lxml urllib3 应该就够了
 
 ## 功能
 
