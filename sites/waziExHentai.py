@@ -851,6 +851,7 @@ class waziExHentai:
         title = waziExHentai.getTitle(self, link, params)
         waziExHentai.createFolder(self, link, params)
         links = waziExHentai.getArchives(self, link)
+        files = []
         if not links:
             return "No url return. / 没有返回 URL。"
         for i in links:
@@ -863,6 +864,7 @@ class waziExHentai:
                 else:
                     fileName = temp.headers["Content-Disposition"]
                     fileName = fileName.split("filename=\"")[1][:-1].encode("latin1").decode("utf-8")
+                    files.append(os.path.join(params["path"], title, i["type"] + "_" + fileName))
                     with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
                         f.write(temp.data)
-        return "Done! / 完工！"
+        return files
