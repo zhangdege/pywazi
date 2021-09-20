@@ -845,7 +845,7 @@ class waziExHentai:
             twoLists.append(temp)
         return twoLists
 
-    def downloadArchives(self, link, params):
+    def downloadArchives(self, link, params, sample):
         tempParams = self.params
         tempParams["useHeaders"] = True
         title = waziExHentai.getTitle(self, link, params)
@@ -854,6 +854,26 @@ class waziExHentai:
         files = []
         if not links:
             return "No url return. / 没有返回 URL。"
+        if sample != "":
+            for i in links:
+                if not i == "None / 无":
+                    if i["type"] == sample:
+                        requestParams = self.request.handleParams(tempParams, "get", i["link"], self.headers,
+                                                                  self.proxies)
+                        try:
+                            temp = self.request.do(requestParams)
+                        except:
+                            pass
+                        else:
+                            try:
+                                fileName = temp.headers["Content-Disposition"]
+                            except:
+                                fileName = i["type"] + "_" + title + ".zip"
+                            else:
+                                fileName = fileName.split("filename=\"")[1][:-1].encode("latin1").decode("utf-8")
+                            with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
+                                f.write(temp.data)
+                            return os.path.join(params["path"], title, i["type"] + "_" + fileName)
         for i in links:
             if not i == "None / 无":
                 requestParams = self.request.handleParams(tempParams, "get", i["link"], self.headers, self.proxies)
@@ -862,8 +882,12 @@ class waziExHentai:
                 except:
                     pass
                 else:
-                    fileName = temp.headers["Content-Disposition"]
-                    fileName = fileName.split("filename=\"")[1][:-1].encode("latin1").decode("utf-8")
+                    try:
+                        fileName = temp.headers["Content-Disposition"]
+                    except:
+                        fileName = i["type"] + "_" + title + ".zip"
+                    else:
+                        fileName = fileName.split("filename=\"")[1][:-1].encode("latin1").decode("utf-8")
                     files.append(os.path.join(params["path"], title, i["type"] + "_" + fileName))
                     with open(os.path.join(params["path"], title, i["type"] + "_" + fileName), "wb") as f:
                         f.write(temp.data)
