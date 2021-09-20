@@ -576,3 +576,8 @@ class waziPicAcg:
     def getUserDirty(self, userId):
         newUrl = self.urls["dirty"].replace("{userId}", userId)
         return waziPicAcg.up(self, newUrl, True, None, "POST", True)
+
+    # 用户资料
+    def getUserProfile(self, userId):
+        newUrl = self.urls["userProfile"].replace("{userId}", userId)
+        return waziPicAcg.up(self, newUrl, True, None, "GET", True)
